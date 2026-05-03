@@ -1,15 +1,21 @@
+<table align="center">
+<tr><td align="center">
+
 # TAHRIX
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Platform-Agentic%20AI%20Blockchain%20Cyber%20Intelligence-blue?style=for-the-badge" alt="Platform">
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/Docker-Ready-blue?style=for-the-badge" alt="Docker">
-  <img src="https://img.shields.io/badge/Python-3.11+-blue?style=for-the-badge" alt="Python">
-  <br><br>
-  <h2>Agentic AI Blockchain Cyber Intelligence Platform</h2>
-</p>
+---
+
+### Agentic AI Blockchain Cyber Intelligence Platform
+
+[![Platform](https://img.shields.io/badge/Platform-Agentic%20AI%20Blockchain%20Cyber%20Intelligence-blue?style=for-the-badge)]()
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)]()
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=for-the-badge)]()
+[![Python](https://img.shields.io/badge/Python-3.11+-blue?style=for-the-badge)]()
 
 > **TAHRIX** is an autonomous blockchain investigation platform that combines agentic AI, graph neural networks, and multi-chain analysis to detect and investigate cryptocurrency-based crime.
+
+</td></tr>
+</table>
 
 <p align="center">
   <img src="demo/full_final_demo.png" alt="TAHRIX Dashboard" width="800">
