@@ -483,6 +483,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div class="field"><label>Email</label><input id="li-email" type="email" placeholder="analyst@tahrix.io"/></div>
     <div class="field"><label>Password</label><input id="li-pass" type="password" placeholder="••••••••"/></div>
     <button class="btn-primary" id="li-btn" onclick="doLogin()">[ ACCESS SYSTEM ]</button>
+    <div style="text-align:center;margin:10px 0;color:var(--text3)">— or —</div>
+    <button class="btn-primary" style="background:var(--accent)" onclick="connectWallet()">[ CONNECT WALLET ]</button>
     <div class="err-msg" id="li-err"></div>
   </div>
 </div>
@@ -1443,6 +1445,38 @@ function summarize(r){
 
 // ─── Login ────────────────────────────────────────────────
 $('li-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin() });
+let walletAddress = null;
+
+async function connectWallet(){
+  if(typeof window.ethereum === 'undefined'){
+    $('li-err').textContent='✕ Install MetaMask or another Web3 wallet';
+    return;
+  }
+  try{
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if(accounts.length === 0){
+      $('li-err').textContent='✕ No account found';
+      return;
+    }
+    walletAddress = accounts[0];
+    const message = `Login to TAHRIX\n\nWallet: ${walletAddress}\nNonce: ${Date.now()}\n\nSign this message to verify ownership.`;
+    const msgBytes = new TextEncoder().encode(message);
+    const signature = await window.ethereum.request({
+      method: 'personal_sign',
+      params: [walletAddress, message]
+    });
+    const r = await fetch(`${API}/auth/wallet-login`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({address:walletAddress, signature, message})
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.detail||d.message||'Wallet auth failed');
+    TOKEN = d.access_token;
+    show('s-input'); $('main-in').focus();
+  }catch(e){ $('li-err').textContent='✕ '+e.message; }
+}
+
 async function doLogin(){
   const email=$('li-email').value.trim(), pass=$('li-pass').value;
   $('li-err').textContent='';

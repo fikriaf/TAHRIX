@@ -56,6 +56,12 @@ class LoginRequest(_Input):
     password: str
 
 
+class WalletLoginRequest(_Input):
+    address: str
+    signature: str
+    message: str
+
+
 class APIKeyCreate(_Input):
     name: str = Field(min_length=1, max_length=120)
     tier: str = "free"

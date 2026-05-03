@@ -30,6 +30,7 @@ from app.models.schemas import (
     TokenPair,
     UserCreate,
     UserOut,
+    WalletLoginRequest,
 )
 from app.models.sql import APIKey, User
 from app.services.audit import audit
@@ -83,6 +84,56 @@ async def login(
                 resource_type="user", resource_id=str(user.id),
                 ip=request.client.host if request.client else None)
     await db.commit()
+    role_value = user.role.value if hasattr(user.role, "value") else str(user.role)
+    return TokenPair(
+        access_token=create_access_token(str(user.id), extra={"role": role_value}),
+        refresh_token=create_refresh_token(str(user.id)),
+    )
+
+
+@router.post("/wallet-login", response_model=TokenPair)
+async def wallet_login(
+    request: Request,
+    body: WalletLoginRequest,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> TokenPair:
+    """Login with wallet signature - verify message signed by wallet address."""
+    from eth_account import Account
+    from eth_account.messages import encode_defunct
+    
+    try:
+        encoded_msg = encode_defunct(text=body.message)
+        recovered = Account.recover_message(encoded_msg, signature=body.signature)
+    except Exception as e:
+        raise UnauthorizedError(f"Invalid signature: {str(e)[:80]}")
+    
+    if recovered.lower() != body.address.lower():
+        raise UnauthorizedError("Signature does not match address")
+    
+    user = (await db.execute(select(User).where(User.wallet_address == body.address.lower()))).scalar_one_or_none()
+    
+    if not user:
+        user = User(
+            email=f"wallet_{body.address.lower()[:16]}@tahrix.io",
+            full_name=f"Wallet User ({body.address[:6]}...{body.address[-4:]})",
+            hashed_password=hash_password(str(uuid.uuid4())),
+            wallet_address=body.address.lower(),
+            role=UserRole.ANALYST,
+        )
+        db.add(user)
+        await db.flush()
+        await audit(db, action="auth.wallet.register", actor_id=user.id,
+                    ip=request.client.host if request.client else None,
+                    metadata={"wallet": body.address})
+    
+    if not user.is_active:
+        raise UnauthorizedError("User inactive")
+    
+    await audit(db, action="auth.wallet_login", actor_id=user.id,
+                ip=request.client.host if request.client else None,
+                metadata={"wallet": body.address})
+    await db.commit()
+    
     role_value = user.role.value if hasattr(user.role, "value") else str(user.role)
     return TokenPair(
         access_token=create_access_token(str(user.id), extra={"role": role_value}),

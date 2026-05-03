@@ -45,6 +45,7 @@ class User(Base, TimestampMixin):
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     full_name: Mapped[str | None] = mapped_column(String(255))
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    wallet_address: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True, index=True)
     role: Mapped[UserRole] = mapped_column(String(32), default=UserRole.ANALYST, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
