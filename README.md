@@ -21,38 +21,7 @@ TAHRIX empowers security analysts and compliance teams to investigate cryptocurr
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Frontend (SPA)                           │
-│   Dashboard │ Graph Visualization │ Agent Chat │ Reports   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    API Layer (FastAPI)                      │
-│   REST │ WebSocket Events │ Authentication (JWT)            │
-└─────────────────────────────────────────────────────────────┘
-                              │
-          ┌───────────────────┴───────────────────┐
-          ▼                                       ▼
-┌─────────────────────┐               ┌─────────────────────┐
-│   Worker (Celery)   │               │   PostgreSQL        │
-│   - Agentic Loop    │               │   - Cases & Events  │
-│   - GNN Inference   │               │   - User Data       │
-│   - Tool Execution  │               └─────────────────────┘
-└─────────────────────┘
-          │                                       ┌─────────────────────┐
-          ▼                                       │   Neo4j             │
-┌─────────────────────┐                           │   - Wallet Graph    │
-│   External APIs     │                           │   - Transactions    │
-│   - Alchemy         │                           │   - Relationships   │
-│   - Helius          │                           └─────────────────────┘
-│   - Etherscan       │                                 │
-│   - Exa AI          │                                 ┌─────────────────────┐
-│   - OpenCode Zen    │                                 │   Redis             │
-│   - Ollama          │                                 │   - Cache & Queue   │
-└─────────────────────┘                                 └─────────────────────┘
-```
+![System Architecture](agentic_ai_architecture.svg)
 
 ## Tech Stack
 
