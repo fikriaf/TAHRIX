@@ -1,0 +1,2649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TAHRIX — Agentic Blockchain Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060a0f;--bg2:#0c1118;--bg3:#111827;--bg4:#1a2234;
+  --border:#1e2d45;--border2:#243552;
+  --blue:#3b82f6;--blue2:#1d4ed8;--blue-dim:#0d1f3c;
+  --cyan:#06b6d4;--cyan-dim:#0c3547;
+  --green:#10b981;--green-dim:#0c3327;
+  --red:#ef4444;--red-dim:#2d0f0f;
+  --amber:#f59e0b;--amber-dim:#2d1f08;
+  --purple:#8b5cf6;--purple-dim:#1e1040;
+  --pink:#ec4899;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --font:'JetBrains Mono',Consolas,monospace;
+  --glow-blue:0 0 20px rgba(59,130,246,.4);
+  --glow-red:0 0 20px rgba(239,68,68,.5);
+  --glow-green:0 0 15px rgba(16,185,129,.3);
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:12px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* SCREENS */
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;transition:opacity .35s,transform .35s}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(.98)}
+
+/* ── LOGIN ── */
+#s-login{background:var(--bg);align-items:center;justify-content:center;z-index:50}
+.login-wrap{width:340px;display:flex;flex-direction:column;gap:20px}
+.logo-ascii{font-size:10px;line-height:1.35;color:var(--blue);text-align:center;text-shadow:var(--glow-blue);white-space:pre}
+.login-sub{text-align:center;color:var(--text3);font-size:9px;letter-spacing:4px;text-transform:uppercase;margin-top:2px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{color:var(--text3);font-size:9px;letter-spacing:2px;text-transform:uppercase}
+.field input{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:12px;padding:10px 12px;outline:none;transition:border .2s}
+.field input:focus{border-color:var(--blue)}
+.btn-primary{background:transparent;border:1px solid var(--blue);color:var(--blue);font-family:var(--font);font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:11px;cursor:pointer;transition:all .2s}
+.btn-primary:hover{background:var(--blue);color:#fff;box-shadow:var(--glow-blue)}
+.err-msg{color:var(--red);font-size:10px;text-align:center;min-height:14px}
+
+/* ── INPUT ── */
+#s-input{background:var(--bg);align-items:center;justify-content:center;z-index:40}
+.input-wrap{width:560px;display:flex;flex-direction:column;gap:22px}
+.inp-logo{color:var(--blue);font-size:18px;font-weight:700;letter-spacing:6px;text-shadow:var(--glow-blue)}
+.inp-tag{color:var(--text3);font-size:9px;letter-spacing:4px;text-transform:uppercase;margin-top:2px}
+.terminal-box{background:var(--bg2);border:1px solid var(--border)}
+.term-bar{background:var(--bg3);padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.td{width:10px;height:10px;border-radius:50%}
+.td.r{background:#ef4444}.td.y{background:#f59e0b}.td.g{background:#10b981}
+.term-ttl{color:var(--text3);font-size:9px;letter-spacing:2px;margin-left:6px}
+.term-body{padding:14px 18px}
+.term-row{display:flex;align-items:center;gap:10px}
+.term-ps{color:var(--green);font-size:14px}
+.term-in{flex:1;background:none;border:none;color:var(--text);font-family:var(--font);font-size:13px;outline:none}
+.term-in::placeholder{color:var(--text3)}
+.hints{margin-top:10px;display:flex;flex-wrap:wrap;gap:5px}
+.hint{background:var(--bg4);border:1px solid var(--border);color:var(--text3);font-size:9px;padding:3px 8px;cursor:pointer;transition:all .2s;letter-spacing:1px}
+.hint:hover{border-color:var(--blue);color:var(--blue)}
+.inp-opts{display:flex;align-items:center;gap:16px}
+.opt-g{display:flex;flex-direction:column;gap:5px}
+.opt-lbl{color:var(--text3);font-size:9px;letter-spacing:2px;text-transform:uppercase}
+.depth-row{display:flex;align-items:center;gap:8px}
+.depth-row input[type=range]{accent-color:var(--blue);width:90px}
+.depth-v{color:var(--blue);font-size:11px;width:12px}
+.btn-inv{background:var(--blue);border:none;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:12px 28px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;margin-left:auto}
+.btn-inv:hover{background:var(--blue2);box-shadow:var(--glow-blue)}
+.btn-inv:disabled{background:var(--bg4);color:var(--text3);cursor:not-allowed}
+.spin{width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.btn-inv.ld .spin{display:block}
+
+/* ── RESOLVE ── */
+#s-resolve{background:var(--bg);align-items:center;justify-content:center;z-index:30}
+.res-wrap{width:540px}
+.res-title{color:var(--blue);font-size:9px;letter-spacing:4px;text-transform:uppercase;margin-bottom:16px}
+.res-entity{color:var(--text);font-size:17px;margin-bottom:20px;font-weight:600}
+.res-steps{display:flex;flex-direction:column;gap:7px;margin-bottom:22px}
+.rst{display:flex;align-items:center;gap:10px;color:var(--text3);font-size:10px;transition:color .2s}
+.rst.done{color:var(--green)}
+.rst.active{color:var(--amber)}
+.rst.err{color:var(--red)}
+.rst-ic{width:14px;text-align:center}
+.res-list{display:flex;flex-direction:column;gap:5px;margin-bottom:20px}
+.res-addr{background:var(--bg2);border:1px solid var(--border);padding:9px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .2s;animation:slideIn .25s}
+.res-addr:hover{border-color:var(--blue)}
+.res-addr.sel{border-color:var(--green);background:var(--green-dim)}
+.chain-badge{padding:2px 7px;font-size:9px;letter-spacing:1px;font-weight:700;border:1px solid;flex-shrink:0}
+.c-ETH{color:var(--blue);border-color:var(--blue);background:var(--blue-dim)}
+.c-BTC{color:var(--amber);border-color:var(--amber);background:var(--amber-dim)}
+.c-SOL{color:var(--purple);border-color:var(--purple);background:var(--purple-dim)}
+.c-TRON{color:var(--red);border-color:var(--red);background:var(--red-dim)}
+.c-BNB{color:var(--amber);border-color:var(--amber);background:var(--amber-dim)}
+.c-POLYGON{color:var(--purple);border-color:var(--purple);background:var(--purple-dim)}
+.c-BASE{color:var(--blue);border-color:var(--blue);background:var(--blue-dim)}
+.c-ARB{color:var(--cyan);border-color:var(--cyan);background:var(--cyan-dim)}
+.addr-txt{font-size:11px;color:var(--text);flex:1;font-family:monospace}
+.addr-lbl{color:var(--text3);font-size:9px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conf-bar{height:3px;background:var(--border);width:50px;border-radius:1px;overflow:hidden;flex-shrink:0}
+.ev-badge{font-size:8px;background:var(--amber-dark);color:var(--amber);padding:2px 5px;border-radius:2px;margin-right:6px}
+.ev-box{font-size:9px;background:var(--bg3);padding:8px 10px;border-left:2px solid var(--amber);margin-bottom:8px;line-height:1.6}
+.ev-link{color:var(--blue);text-decoration:none;display:block;margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev-link:hover{text-decoration:underline}
+.conf-fill{height:100%;background:var(--green);transition:width .5s}
+.res-acts{display:flex;gap:10px;align-items:center}
+.btn-sec{background:transparent;border:1px solid var(--border);color:var(--text2);font-family:var(--font);font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:9px 18px;cursor:pointer;transition:all .2s}
+.btn-sec:hover{border-color:var(--text2)}
+.res-hint{color:var(--text3);font-size:9px;margin-left:6px}
+
+/* ── HUD ── */
+#s-hud{background:var(--bg);flex-direction:column;z-index:20}
+
+/* topbar */
+.hud-top{height:38px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:14px;flex-shrink:0}
+.hud-logo{color:var(--blue);font-size:12px;font-weight:700;letter-spacing:4px;text-shadow:var(--glow-blue)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;box-shadow:0 0 6px var(--green);flex-shrink:0}
+.live-lbl{color:var(--green);font-size:8px;letter-spacing:2px}
+.sep{color:var(--border2);margin:0 2px}
+.hud-case{color:var(--text2);font-size:10px}
+.hud-addr{color:var(--text);font-size:10px;font-family:monospace}
+.hud-ch{font-size:8px;padding:2px 5px;letter-spacing:1px;border:1px solid;margin-left:3px}
+.hud-st{font-size:8px;letter-spacing:2px;padding:2px 7px;border:1px solid}
+.st-pending{color:var(--text3);border-color:var(--border)}
+.st-running{color:var(--amber);border-color:var(--amber);animation:blink 1.2s infinite}
+.st-queued{color:var(--text3);border-color:var(--amber);animation:blink 2s infinite}
+.st-completed{color:var(--green);border-color:var(--green)}
+.st-failed{color:var(--red);border-color:var(--red)}
+.hud-timer{color:var(--text3);font-size:10px;margin-left:auto}
+.btn-new{background:transparent;border:1px solid var(--border);color:var(--text3);font-family:var(--font);font-size:8px;letter-spacing:2px;padding:3px 9px;cursor:pointer;transition:all .2s}
+.btn-new:hover{border-color:var(--blue);color:var(--blue)}
+.btn-label{background:transparent;border:1px solid var(--border);color:var(--text3);font-family:var(--font);font-size:8px;letter-spacing:2px;padding:3px 9px;cursor:pointer;transition:all .2s}
+.btn-label:hover{border-color:var(--amber);color:var(--amber)}
+
+/* ── Label Modal ── */
+.lbl-overlay{position:fixed;inset:0;background:rgba(6,10,15,.88);display:none;align-items:center;justify-content:center;z-index:200}
+.lbl-overlay.open{display:flex}
+.lbl-box{width:540px;max-height:90vh;background:var(--bg2);border:1px solid var(--border2);display:flex;flex-direction:column;box-shadow:0 8px 48px rgba(0,0,0,.7)}
+.lbl-hdr{padding:12px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.lbl-hdr-title{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--amber)}
+.lbl-close{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;font-family:monospace;padding:0 2px;line-height:1}
+.lbl-close:hover{color:var(--text)}
+.lbl-body{padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px}
+.lbl-field{display:flex;flex-direction:column;gap:4px}
+.lbl-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+.lbl-input{background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-family:var(--font);font-size:10px;padding:7px 10px;outline:none;transition:border-color .2s;width:100%}
+.lbl-input:focus{border-color:var(--amber)}
+.lbl-textarea{resize:vertical;min-height:80px;line-height:1.6}
+.lbl-tags-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.lbl-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:rgba(245,158,11,.12);border:1px solid var(--amber);color:var(--amber);font-size:8px;letter-spacing:1px;cursor:pointer}
+.lbl-tag-rm{color:var(--text3);font-size:11px;line-height:1}
+.lbl-tag-rm:hover{color:var(--red)}
+.lbl-tag-input-row{display:flex;gap:6px}
+.lbl-tag-input-row .lbl-input{flex:1}
+.btn-add-tag{background:transparent;border:1px solid var(--border2);color:var(--text3);font-family:var(--font);font-size:8px;padding:7px 10px;cursor:pointer;white-space:nowrap}
+.btn-add-tag:hover{border-color:var(--amber);color:var(--amber)}
+.lbl-file-area{border:1px dashed var(--border2);padding:12px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative}
+.lbl-file-area:hover,.lbl-file-area.drag{border-color:var(--amber);background:rgba(245,158,11,.04)}
+.lbl-file-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.lbl-file-name{font-size:9px;color:var(--text2);margin-top:4px;word-break:break-all}
+.lbl-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-shrink:0}
+.btn-lbl-submit{background:var(--amber);border:none;color:#000;font-family:var(--font);font-size:8px;letter-spacing:2px;padding:7px 18px;cursor:pointer;transition:opacity .2s;font-weight:700}
+.btn-lbl-submit:hover{opacity:.85}
+.btn-lbl-submit:disabled{opacity:.4;cursor:not-allowed}
+.lbl-status{font-size:9px;color:var(--text3);flex:1}
+/* Audit result strip */
+.lbl-audit{padding:10px 12px;border:1px solid var(--border2);background:var(--bg3);font-size:9px;line-height:1.7;display:none}
+.lbl-audit.show{display:block}
+.lbl-audit-verdict{font-size:8px;letter-spacing:2px;font-weight:700;margin-bottom:4px}
+.v-CONFIRMED{color:var(--green)}.v-DISPUTED{color:var(--red)}.v-INCONCLUSIVE{color:var(--amber)}
+.lbl-audit-sum{color:var(--text2);margin-bottom:4px}
+.lbl-audit-flags{color:var(--text3);font-size:8px}
+
+/* grid */
+.hud-main{flex:1;display:grid;grid-template-columns:210px 1fr 210px;grid-template-rows:1fr 1fr;gap:1px;background:var(--border);overflow:hidden}
+
+/* panel */
+.panel{background:var(--bg2);display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.ph{padding:7px 11px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0}
+.ph-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ph-title{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--text3)}
+.ph-right{margin-left:auto;color:var(--text3);font-size:8px}
+.pb{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:5px;min-height:0}
+
+/* graph center */
+.graph-panel{grid-column:2;grid-row:1/3;background:var(--bg);position:relative;overflow:hidden}
+.graph-overlay{position:absolute;top:8px;left:8px;display:flex;gap:5px;flex-wrap:wrap;z-index:5}
+.gf-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text3);font-family:var(--font);font-size:8px;padding:3px 8px;cursor:pointer;transition:all .2s;letter-spacing:1px}
+.gf-btn.on{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+.graph-info{position:absolute;bottom:8px;left:8px;color:var(--text3);font-size:9px;z-index:5}
+.graph-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--border2);font-size:11px;letter-spacing:2px}
+.g-tooltip{position:absolute;background:var(--bg2);border:1px solid var(--border2);padding:10px 12px;font-size:9px;pointer-events:none;display:none;z-index:20;max-width:280px;line-height:1.8;box-shadow:0 4px 24px rgba(0,0,0,.6)}
+.gtt-type{font-size:8px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.gtt-row{display:flex;gap:6px;color:var(--text2)}
+.gtt-k{color:var(--text3);flex-shrink:0;width:76px}
+.gtt-v{color:var(--text);word-break:break-all;flex:1}
+.gtt-badge{display:inline-block;padding:1px 6px;font-size:8px;letter-spacing:1px;margin-top:4px}
+.gtt-sanc{background:var(--red-dim);color:var(--red);border:1px solid var(--red)}
+
+/* ── Tahrix Agent Chat ── */
+.tahrix-agent{position:absolute;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border2);z-index:50;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.tahrix-agent.open{transform:translateY(0)}
+.ta-toggle{position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border2);border-bottom:none;border-radius:6px 6px 0 0;padding:8px 16px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .2s}
+.ta-toggle:hover{background:var(--bg3)}
+.ta-toggle svg{width:12px;height:12px;transition:transform .3s}
+.ta-toggle.open{left:50%;transform:translateX(-50%)}
+.ta-toggle.open svg{transform:rotate(0deg)}
+.ta-toggle svg{transform:rotate(180deg)}
+.ta-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ta-title{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan)}
+.ta-dot{width:8px;height:8px;background:var(--cyan);border-radius:50%;animation:ta-pulse 2s infinite}
+@keyframes ta-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ta-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:200px;max-height:350px}
+.ta-msg{display:flex;flex-direction:column;gap:4px;max-width:85%}
+.ta-msg.user{align-self:flex-end}
+.ta-msg.agent{align-self:flex-start}
+.ta-msg-role{font-size:7px;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+.ta-msg-content{font-size:9px;line-height:1.6;color:var(--text);padding:8px 11px;border-radius:8px;word-break:break-word}
+.ta-msg.user .ta-msg-content{background:var(--blue-dim);border:1px solid var(--blue);border-bottom-right-radius:2px}
+.ta-msg.agent .ta-msg-content{background:var(--bg3);border:1px solid var(--border2);border-bottom-left-radius:2px}
+.ta-input-wrap{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.ta-input{flex:1;background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-size:9px;padding:8px 12px;outline:none;border-radius:6px}
+.ta-input:focus{border-color:var(--cyan)}
+.ta-send{background:var(--cyan);border:none;color:var(--bg);font-size:9px;letter-spacing:1px;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600}
+.ta-send:hover{opacity:.85}
+.ta-tools{display:flex;flex-wrap:wrap;gap:4px;padding:8px 0;border-top:1px solid var(--border);margin-top:4px}
+.ta-tool-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:7px;letter-spacing:1px;padding:4px 8px;border-radius:4px;cursor:pointer;transition:all .2s}
+.ta-tool-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.ta-loading{font-size:8px;color:var(--text3);padding:8px;text-align:center}
+.gtt-focal{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue)}
+
+/* ── Node Detail Drawer ── */
+@keyframes drawerUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes drawerDown{from{transform:translateY(0)}to{transform:translateY(100%)}}
+#node-drawer{
+  position:absolute;bottom:0;right:0;
+  width:272px;max-height:72%;
+  background:var(--bg2);
+  border-top:1px solid var(--border2);
+  border-left:1px solid var(--border2);
+  display:flex;flex-direction:column;
+  z-index:30;
+  transform:translateY(100%);
+  pointer-events:none;
+  box-shadow:-4px -4px 24px rgba(0,0,0,.55);
+}
+#node-drawer.nd-open{
+  animation:drawerUp .32s cubic-bezier(.22,.9,.36,1) forwards;
+  pointer-events:all;
+}
+#node-drawer.nd-closing{
+  animation:drawerDown .26s cubic-bezier(.6,0,.8,.4) forwards;
+  pointer-events:none;
+}
+.nd-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 10px 6px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.nd-type-pill{
+  font-size:7px;letter-spacing:2px;text-transform:uppercase;
+  padding:2px 7px;border:1px solid currentColor;
+}
+.nd-close{
+  background:none;border:none;color:var(--text3);
+  font-size:14px;line-height:1;cursor:pointer;padding:0 2px;
+  font-family:monospace;
+}
+.nd-close:hover{color:var(--text)}
+.nd-body{
+  overflow-y:auto;padding:10px 11px 12px;
+  font-size:9px;line-height:1.9;flex:1;
+}
+.nd-section{
+  font-size:7.5px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text3);margin:10px 0 4px;padding-bottom:3px;
+  border-bottom:1px solid var(--border);
+}
+.nd-row{display:flex;gap:6px;margin:1px 0}
+.nd-k{color:var(--text3);flex-shrink:0;width:88px;font-size:8.5px}
+.nd-v{color:var(--text);word-break:break-all;flex:1;font-size:8.5px}
+.nd-mono{font-family:monospace;font-size:8px;color:var(--blue);word-break:break-all}
+.nd-badge{display:inline-block;padding:1px 6px;font-size:7.5px;letter-spacing:1px;margin:3px 3px 0 0}
+.nd-sanc{background:var(--red-dim);color:var(--red);border:1px solid var(--red)}
+.nd-focal{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue)}
+.nd-contract{background:rgba(16,185,129,.12);color:#10b981;border:1px solid #10b981}
+.nd-risk-bar{height:3px;background:var(--border2);margin-top:4px;border-radius:2px;overflow:hidden}
+.nd-risk-fill{height:100%;border-radius:2px;transition:width .4s}
+.nd-snip{color:var(--text2);font-size:8px;line-height:1.6;margin-top:4px;padding:5px 7px;background:var(--bg4);border-left:2px solid var(--border2)}
+
+/* cog loop */
+.cog-item{display:flex;gap:8px;padding:5px 7px;border-left:2px solid transparent;animation:slideIn .2s}
+.cog-item.think{border-color:var(--purple)}.cog-item.act{border-color:var(--blue)}
+.cog-item.observe{border-color:var(--green)}.cog-item.reflect{border-color:var(--amber)}
+.cog-item.active{background:var(--bg4)}
+.cog-ph{font-size:8px;letter-spacing:1px;width:52px;flex-shrink:0;padding-top:1px}
+.cog-ph.think{color:var(--purple)}.cog-ph.act{color:var(--blue)}
+.cog-ph.observe{color:var(--green)}.cog-ph.reflect{color:var(--amber)}
+.cog-txt{color:var(--text2);font-size:9px;line-height:1.5;word-break:break-all;flex:1}
+.cog-it{color:var(--text3);font-size:8px;flex-shrink:0}
+
+/* tool panel */
+.tool-item{background:var(--bg3);border:1px solid var(--border);padding:7px 9px;animation:slideIn .2s;transition:border .3s}
+.tool-item.running{border-color:var(--blue)}
+.tool-item.done{border-color:var(--green)}
+.tool-item.warn{border-color:var(--amber)}
+.tool-item.err{border-color:var(--red)}
+.t-name{color:var(--blue);font-size:10px;display:flex;align-items:center;gap:6px}
+.t-name .st-ic{font-size:9px}
+.t-args{color:var(--text3);font-size:9px;margin-top:2px;line-height:1.4;word-break:break-all}
+.t-res{font-size:9px;margin-top:3px;line-height:1.4}
+.t-res.ok{color:var(--green)}.t-res.bad{color:var(--red)}.t-res.info{color:var(--text2)}
+
+/* risk panel */
+.risk-center{text-align:center;padding:12px 0 8px}
+.risk-num{font-size:46px;font-weight:700;line-height:1;transition:color .5s}
+.risk-grade{font-size:10px;letter-spacing:5px;text-transform:uppercase;margin-top:5px}
+.risk-grade.low{color:var(--green)}.risk-grade.medium{color:var(--amber)}
+.risk-grade.high{color:var(--red)}.risk-grade.critical{color:var(--red);text-shadow:var(--glow-red);animation:blink .7s infinite}
+.risk-bar-g{margin:3px 0}
+.rb-row{display:flex;justify-content:space-between;color:var(--text3);font-size:8px;margin-bottom:2px}
+.rb-track{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.rb-fill{height:100%;border-radius:2px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+.rb-gnn{background:var(--blue)}.rb-anom{background:var(--amber)}.rb-sanc{background:var(--red)}
+.shap-wrap{margin-top:6px;border-top:1px solid var(--border);padding-top:6px}
+.shap-ttl{color:var(--text3);font-size:8px;letter-spacing:2px;margin-bottom:5px}
+.shap-r{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.shap-k{color:var(--text2);font-size:8px;width:80px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shap-b{height:5px;flex:1;background:var(--border);border-radius:2px;overflow:hidden}
+.shap-f{height:100%;background:var(--blue);border-radius:2px;transition:width .8s}
+.shap-v{color:var(--blue);font-size:8px;width:28px;text-align:right;flex-shrink:0}
+.ipfs-pill{background:var(--purple-dim);border:1px solid var(--purple);padding:5px 9px;display:flex;align-items:center;gap:7px;margin-top:5px}
+.ipfs-lbl{color:var(--purple);font-size:8px;letter-spacing:2px;flex-shrink:0}
+.ipfs-cid{color:var(--text2);font-size:8px;word-break:break-all;font-family:monospace}
+
+/* anomaly + hyp panel */
+.anom-grid{display:flex;flex-direction:column;gap:3px}
+.af{display:flex;align-items:center;gap:7px;padding:4px 7px;background:var(--bg3);border:1px solid var(--border);transition:all .3s}
+.af.on{border-color:var(--red);background:var(--red-dim);animation:glow-red .8s ease}
+.af-code{font-size:8px;letter-spacing:1px;width:26px;color:var(--text3);flex-shrink:0}
+.af.on .af-code{color:var(--red)}
+.af-name{font-size:8px;flex:1;color:var(--text3)}
+.af.on .af-name{color:var(--red)}
+.af-sev{height:3px;width:36px;background:var(--border);border-radius:1px;overflow:hidden;flex-shrink:0}
+.af-sfill{height:100%;background:var(--red);border-radius:1px;transition:width .6s}
+.sanc-hit{background:var(--red-dim);border:1px solid var(--red);padding:8px 9px;animation:slideIn .2s}
+.sanc-title{color:var(--red);font-size:9px;letter-spacing:2px;font-weight:700}
+.sanc-desc{color:var(--text2);font-size:9px;margin-top:3px;line-height:1.5}
+.sanc-ok{color:var(--green);font-size:9px;padding:4px 0}
+.hyp-item{background:var(--bg3);border:1px solid var(--border);padding:7px 9px;animation:slideIn .2s}
+.hyp-txt{color:var(--text2);font-size:9px;line-height:1.5;margin-bottom:5px}
+.hyp-row{display:flex;align-items:center;gap:7px}
+.hyp-bar{flex:1;height:3px;background:var(--border);border-radius:1px;overflow:hidden}
+.hyp-fill{height:100%;background:var(--blue);border-radius:1px;transition:width .8s}
+.hyp-val{color:var(--blue);font-size:9px;width:30px;text-align:right}
+.sec-lbl{color:var(--text3);font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:5px 0 3px;border-top:1px solid var(--border);margin-top:4px}
+.mem-row{display:flex;justify-content:space-between;color:var(--text3);font-size:9px;padding:2px 0}
+.mem-row span:last-child{color:var(--text2)}
+
+/* log bar — split into left (event log) + right (LLM output) */
+.hud-logbar{height:110px;background:var(--bg);border-top:1px solid var(--border);flex-shrink:0;display:flex}
+.hud-log{flex:1;overflow-y:auto;padding:0 12px;display:flex;flex-direction:column-reverse;min-width:0}
+.hud-llm{width:32%;border-left:1px solid var(--border);display:flex;flex-direction:column;min-width:0}
+.llm-hdr{padding:4px 10px;font-size:8px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:6px}
+.llm-hdr-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0}
+.llm-body{flex:1;overflow-y:auto;padding:6px 10px;display:flex;flex-direction:column;gap:4px}
+.llm-entry{font-size:9px;line-height:1.55;color:var(--text2);border-left:2px solid var(--border2);padding-left:8px;word-break:break-word}
+.llm-entry.think{border-color:var(--purple)}
+.llm-entry.reflect{border-color:var(--amber);color:var(--text)}
+.llm-entry.observe{border-color:var(--green)}
+.llm-entry .llm-ph{font-size:8px;letter-spacing:1px;margin-bottom:2px}
+.llm-entry.think .llm-ph{color:var(--purple)}
+.llm-entry.reflect .llm-ph{color:var(--amber)}
+.llm-entry.observe .llm-ph{color:var(--green)}
+
+/* ── Label Feed Panel (between LLM and Event Log) ── */
+.hud-labels{width:30%;border-left:1px solid var(--border);display:flex;flex-direction:column;min-width:0}
+.lf-hdr{padding:4px 10px;font-size:8px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:6px;justify-content:space-between}
+.lf-hdr-left{display:flex;align-items:center;gap:6px}
+.lf-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0}
+.lf-body{flex:1;overflow-y:auto;padding:4px 8px;display:flex;flex-direction:column;gap:3px}
+.lf-empty{color:var(--text3);font-size:8px;padding:8px 2px;letter-spacing:1px}
+.lf-item{display:flex;align-items:flex-start;gap:5px;padding:3px 4px;border-bottom:1px solid rgba(30,45,69,.4);cursor:default}
+.lf-item:hover{background:var(--bg3)}
+.lf-verdict{flex-shrink:0;font-size:7px;letter-spacing:1px;padding:1px 5px;border:1px solid currentColor;font-weight:700}
+.lf-v-CONFIRMED{color:var(--green)}.lf-v-DISPUTED{color:var(--red)}.lf-v-INCONCLUSIVE{color:var(--amber)}.lf-v-PENDING{color:var(--text3)}
+.lf-info{flex:1;min-width:0}
+.lf-addr{font-family:monospace;font-size:8px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lf-tags{font-size:7.5px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lf-auto-badge{font-size:6.5px;letter-spacing:1px;padding:0 4px;background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);flex-shrink:0;align-self:center}
+.log-row{display:flex;gap:10px;padding:2px 0;border-bottom:1px solid rgba(30,45,69,.5);font-size:9px}
+.log-ts{color:var(--text3);flex-shrink:0;width:48px}
+.log-ph{flex-shrink:0;width:56px}
+.log-ph.think{color:var(--purple)}.log-ph.act{color:var(--blue)}
+.log-ph.observe{color:var(--green)}.log-ph.reflect{color:var(--amber)}
+.log-ph.risk{color:var(--red)}.log-ph.status{color:var(--cyan)}.log-ph.done{color:var(--green)}
+.log-msg{color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Markdown render — LLM reflect entries & summary text ── */
+.md-render{line-height:1.65}
+.md-render h1,.md-render h2,.md-render h3{color:var(--text);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin:7px 0 3px;padding-bottom:2px;border-bottom:1px solid var(--border)}
+.md-render h1{color:var(--amber)}
+.md-render h2{color:var(--blue)}
+.md-render h3{color:var(--text);border-bottom:none}
+.md-render p{margin:3px 0;color:var(--text2);font-size:9px}
+.md-render strong{color:var(--text);font-weight:600}
+.md-render em{color:var(--text);font-style:italic}
+.md-render ul,.md-render ol{padding-left:14px;margin:3px 0}
+.md-render li{color:var(--text2);font-size:9px;margin:2px 0}
+.md-render li strong{color:var(--text)}
+.md-render code{font-family:monospace;font-size:8px;background:var(--bg4);padding:0 3px;color:var(--cyan);border:1px solid var(--border)}
+.md-render pre{background:var(--bg4);border:1px solid var(--border);padding:6px 8px;margin:4px 0;overflow-x:auto}
+.md-render pre code{background:none;border:none;padding:0;font-size:8px;color:var(--cyan)}
+.md-render blockquote{border-left:2px solid var(--amber);margin:4px 0;padding:2px 8px;color:var(--text3);font-style:italic}
+.md-render hr{border:none;border-top:1px solid var(--border);margin:6px 0}
+.md-render a{color:var(--blue);text-decoration:none}.md-render a:hover{text-decoration:underline}
+/* sum-text gets bigger text */
+.sum-text .md-render p{font-size:10px}
+.sum-text .md-render li{font-size:10px}
+.sum-text .md-render h2{font-size:10px}
+.sum-text .md-render h3{font-size:10px}
+
+/* summary overlay */
+.summary-overlay{position:fixed;inset:0;background:rgba(6,10,15,.92);display:flex;align-items:center;justify-content:center;z-index:100;display:none}
+.summary-box{width:560px;background:var(--bg2);border:1px solid var(--border2);padding:28px 32px;display:flex;flex-direction:column;gap:16px}
+.sum-title{color:var(--blue);font-size:9px;letter-spacing:4px;text-transform:uppercase}
+.sum-verdict{font-size:22px;font-weight:700}
+.sum-verdict.low{color:var(--green)}.sum-verdict.medium{color:var(--amber)}
+.sum-verdict.high{color:var(--red)}.sum-verdict.critical{color:var(--red);text-shadow:var(--glow-red)}
+.sum-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sum-kv{display:flex;flex-direction:column;gap:2px}
+.sum-k{color:var(--text3);font-size:8px;letter-spacing:2px;text-transform:uppercase}
+.sum-v{color:var(--text);font-size:11px}
+.sum-text{color:var(--text2);font-size:10px;line-height:1.7;background:var(--bg3);padding:12px;border-left:2px solid var(--blue);max-height:240px;overflow-y:auto}
+.sum-acts{display:flex;gap:10px}
+
+/* ── GRAPH EXPORT DROPDOWN ── */
+.graph-export-wrap{position:absolute;top:8px;right:8px;z-index:10}
+.btn-gexport{background:var(--bg2);border:1px solid var(--border);color:var(--text3);font-family:var(--font);font-size:8px;padding:4px 10px;cursor:pointer;transition:all .2s;letter-spacing:1px;display:flex;align-items:center;gap:5px}
+.btn-gexport:hover{border-color:var(--blue);color:var(--blue)}
+.gexport-menu{display:none;position:absolute;right:0;top:calc(100% + 3px);background:var(--bg2);border:1px solid var(--border2);min-width:110px;z-index:20;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.gexport-menu.open{display:block}
+.gexport-item{padding:6px 12px;font-size:9px;letter-spacing:1px;color:var(--text2);cursor:pointer;transition:background .15s;white-space:nowrap}
+.gexport-item:hover{background:var(--bg4);color:var(--blue)}
+
+/* ── REPORT EXPORT BUTTON ── */
+.btn-report{background:transparent;border:1px solid var(--border);color:var(--text3);font-family:var(--font);font-size:8px;letter-spacing:2px;padding:3px 9px;cursor:pointer;transition:all .2s;position:relative;display:flex;align-items:center;gap:5px}
+.btn-report:hover:not(:disabled){border-color:var(--green);color:var(--green)}
+.btn-report:disabled{opacity:.5;cursor:not-allowed}
+.btn-report.creating{border-color:var(--amber);color:var(--amber);animation:blink 1.2s infinite}
+.report-menu{display:none;position:absolute;right:0;top:calc(100% + 3px);background:var(--bg2);border:1px solid var(--border2);min-width:120px;z-index:20;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.report-menu.open{display:block}
+.report-item{padding:7px 12px;font-size:9px;letter-spacing:1px;color:var(--text2);cursor:pointer;transition:background .15s;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.report-item:hover{background:var(--bg4);color:var(--green)}
+.report-item .ri-icon{font-size:10px;width:14px;text-align:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+@keyframes glow-red{0%{box-shadow:none}50%{box-shadow:0 0 10px rgba(239,68,68,.4)}100%{box-shadow:none}}
+.scanline{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);z-index:999}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<!-- LOGIN -->
+<div class="screen" id="s-login">
+  <div class="login-wrap">
+    <div class="logo-ascii">████████╗ █████╗ ██╗  ██╗██████╗ ██╗██╗  ██╗
+   ██╔══╝██╔══██╗██║  ██║██╔══██╗██║╚██╗██╔╝
+   ██║   ███████║███████║██████╔╝██║ ╚███╔╝
+   ██║   ██╔══██║██╔══██║██╔══██╗██║ ██╔██╗
+   ██║   ██║  ██║██║  ██║██║  ██║██║██╔╝ ██╗
+   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝</div>
+    <div class="login-sub">Agentic Blockchain Cyber Intelligence</div>
+    <div class="field"><label>Email</label><input id="li-email" type="email" placeholder="analyst@tahrix.io"/></div>
+    <div class="field"><label>Password</label><input id="li-pass" type="password" placeholder="••••••••"/></div>
+    <button class="btn-primary" id="li-btn" onclick="doLogin()">[ ACCESS SYSTEM ]</button>
+    <div class="err-msg" id="li-err"></div>
+  </div>
+</div>
+
+<!-- INPUT -->
+<div class="screen hidden" id="s-input">
+  <div class="input-wrap">
+    <div><div class="inp-logo">TAHRIX</div><div class="inp-tag">Agentic Blockchain Intelligence</div></div>
+    <div class="terminal-box">
+      <div class="term-bar">
+        <div class="td r"></div><div class="td y"></div><div class="td g"></div>
+        <span class="term-ttl">INVESTIGATION TERMINAL</span>
+      </div>
+      <div class="term-body">
+        <div class="term-row">
+          <span class="term-ps">❯</span>
+          <input class="term-in" id="main-in" placeholder="Address · Company · Domain · Email · TX Hash..." autocomplete="off" spellcheck="false"/>
+        </div>
+        <div class="hints">
+          <span class="hint" onclick="setInput('Tornado Cash')">Tornado Cash</span>
+          <span class="hint" onclick="setInput('FTX')">FTX</span>
+          <span class="hint" onclick="setInput('tornado.cash')">tornado.cash</span>
+          <span class="hint" onclick="setInput('0xd882cfc20f52f2599d84b8e8d58c7fb62cfe344b')">0xd882…344b</span>
+          <span class="hint" onclick="setInput('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh')">BTC bc1q…</span>
+        </div>
+      </div>
+    </div>
+    <div class="inp-opts">
+      <div class="opt-g">
+        <div class="opt-lbl">Depth</div>
+        <div class="depth-row">
+          <input type="range" id="depth-r" min="1" max="5" value="3" oninput="document.getElementById('dv').textContent=this.value"/>
+          <span class="depth-v" id="dv">3</span>
+          <span style="color:var(--text3);font-size:9px">hops</span>
+        </div>
+      </div>
+      <div class="opt-g">
+        <div class="opt-lbl">Iterations</div>
+        <div class="depth-row">
+          <input type="range" id="iter-r" min="1" max="10" value="5" oninput="document.getElementById('iv').textContent=this.value"/>
+          <span class="depth-v" id="iv">5</span>
+          <span style="color:var(--text3);font-size:9px">cycles</span>
+        </div>
+      </div>
+      <button class="btn-inv" id="inv-btn" onclick="startFlow()">
+        <div class="spin"></div><span>INVESTIGATE →</span>
+      </button>
+    </div>
+    <div class="err-msg" id="inv-err"></div>
+  </div>
+</div>
+
+<!-- RESOLVE -->
+<div class="screen hidden" id="s-resolve">
+  <div class="res-wrap">
+    <div class="res-title">▶ RESOLVING IDENTITY</div>
+    <div class="res-entity" id="re-entity"></div>
+    <div class="res-steps" id="re-steps">
+      <div class="rst active" id="rs0"><span class="rst-ic">⟳</span>Detecting input type...</div>
+      <div class="rst" id="rs1"><span class="rst-ic">○</span>Querying Exa AI neural search...</div>
+      <div class="rst" id="rs2"><span class="rst-ic">○</span>Extracting blockchain addresses...</div>
+      <div class="rst" id="rs3"><span class="rst-ic">○</span>Ranking by confidence...</div>
+    </div>
+    <div class="res-list" id="re-list"></div>
+    <div class="res-acts" id="re-acts" style="display:none">
+      <button class="btn-primary" id="re-go" onclick="launchSelected()" style="font-size:9px;padding:9px 20px">[ INVESTIGATE SELECTED ]</button>
+      <button class="btn-primary" id="re-auto" onclick="autoInvestigate()" style="font-size:9px;padding:9px 20px;background:var(--amber-dark);color:var(--amber)">[ AUTO INVESTIGATE ]</button>
+      <button class="btn-sec" onclick="show('s-input')">← BACK</button>
+      <span class="res-hint" id="re-hint"></span>
+    </div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div class="screen hidden" id="s-hud">
+  <div class="hud-top">
+    <span class="hud-logo">TAHRIX</span>
+    <div class="live-dot" id="ldot"></div>
+    <span class="live-lbl" id="llbl">LIVE</span>
+    <span class="sep">│</span>
+    <span class="hud-case" id="hcnum">—</span>
+    <span class="sep">│</span>
+    <span class="hud-addr" id="haddr">—</span>
+    <span class="hud-ch c-ETH" id="hchain">ETH</span>
+    <span class="hud-st st-pending" id="hstat">PENDING</span>
+    <span class="hud-timer" id="htimer">00:00</span>
+    <!-- Report export button — only visible when completed -->
+    <div style="position:relative" id="report-btn-wrap">
+      <button class="btn-report" id="btn-report" disabled onclick="toggleReportMenu(event)">
+        <span id="report-btn-txt">EXPORT REPORT ▾</span>
+      </button>
+      <div class="report-menu" id="report-menu">
+        <div class="report-item" onclick="downloadReport('pdf')"><span class="ri-icon">📄</span>PDF</div>
+        <div class="report-item" onclick="downloadReport('md')"><span class="ri-icon">📝</span>Markdown</div>
+        <div class="report-item" onclick="downloadReport('docx')"><span class="ri-icon">📋</span>Word (.docx)</div>
+      </div>
+    </div>
+    <button class="btn-label" onclick="openLabelModal()">⊕ SUBMIT LABEL</button>
+    <button class="btn-new" onclick="show('s-input')">＋ NEW</button>
+  </div>
+
+  <div class="hud-main">
+    <!-- LEFT TOP: Cognitive Loop -->
+    <div class="panel">
+      <div class="ph"><div class="ph-dot" style="background:var(--purple)"></div><span class="ph-title">Cognitive Loop</span><span class="ph-right" id="iter-d">iter 0/5</span></div>
+      <div class="pb" id="cog-body"></div>
+    </div>
+
+    <!-- CENTER: Graph -->
+    <div class="graph-panel">
+      <div class="graph-overlay">
+        <button class="gf-btn on" onclick="toggleF(this,'Wallet')">Wallet</button>
+        <button class="gf-btn on" onclick="toggleF(this,'Transaction')">TX</button>
+        <button class="gf-btn on" onclick="toggleF(this,'Entity')">Entity</button>
+        <button class="gf-btn on" onclick="toggleF(this,'OsintNode')">OSINT</button>
+        <button class="gf-btn on" onclick="toggleF(this,'ThreatIntel')">Threat</button>
+        <button class="gf-btn on" onclick="toggleF(this,'AnomalyPattern')">Anomaly</button>
+      </div>
+      <!-- Graph export dropdown — top right -->
+      <div class="graph-export-wrap" id="gexport-wrap">
+        <button class="btn-gexport" onclick="toggleGExportMenu(event)">⬇ EXPORT ▾</button>
+        <div class="gexport-menu" id="gexport-menu">
+          <div class="gexport-item" onclick="exportGraph('png')">🖼 PNG</div>
+          <div class="gexport-item" onclick="exportGraph('jpg')">📷 JPG</div>
+          <div class="gexport-item" onclick="exportGraph('svg')">🔲 SVG</div>
+        </div>
+      </div>
+      <div class="graph-empty" id="graph-empty">GRAPH POPULATING...</div>
+      <svg id="gsvg" style="width:100%;height:100%"><defs><marker id="arr" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#243552"/></marker></defs><g id="gg"></g></svg>
+      <div class="graph-info" id="ginfo">0 nodes · 0 edges</div>
+      <div class="g-tooltip" id="gtt"></div>
+      <!-- Node Detail Drawer — bottom-right curtain -->
+      <div id="node-drawer">
+        <div class="nd-header">
+          <span class="nd-type-pill" id="nd-type-pill">NODE</span>
+          <button class="nd-close" id="nd-close" title="Close" onclick="closeNodeDrawer()">✕</button>
+        </div>
+        <div class="nd-body" id="nd-body"></div>
+      </div>
+      <!-- Tahrix Agent Chat Panel -->
+      <div class="tahrix-agent" id="tahrix-agent">
+        <button class="ta-toggle" id="ta-toggle" onclick="toggleTahrixAgent()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10l5 5 5-5"/></svg>
+          <span>TAHRIX AGENT</span>
+        </button>
+        <div class="ta-header">
+          <div class="ta-title"><div class="ta-dot"></div>TAHRIX AGENT</div>
+          <div style="font-size:8px;color:var(--text3)">AI Investigation Assistant</div>
+        </div>
+        <div class="ta-body" id="ta-body">
+          <div class="ta-msg agent">
+            <span class="ta-msg-role">TAHRIX AGENT</span>
+            <div class="ta-msg-content">Hello! I'm your AI investigation assistant. Ask me about the current case, graph data, risk analysis, or use the tools below.</div>
+          </div>
+        </div>
+        <div class="ta-tools" id="ta-tools">
+          <button class="ta-tool-btn" onclick="taQuickAction('summary')">📊 Case Summary</button>
+          <button class="ta-tool-btn" onclick="taQuickAction('graph')">🔗 Graph Info</button>
+          <button class="ta-tool-btn" onclick="taQuickAction('risk')">⚠️ Risk Details</button>
+          <button class="ta-tool-btn" onclick="taQuickAction('nodes')">📌 Node List</button>
+          <button class="ta-tool-btn" onclick="taQuickAction('events')">📜 Events</button>
+          <button class="ta-tool-btn" onclick="taQuickAction('labels')">🏷 Labels</button>
+        </div>
+        <div class="ta-input-wrap">
+          <input class="ta-input" id="ta-input" type="text" placeholder="Ask about the case, tools, or analysis..." onkeydown="if(event.key==='Enter')sendTaMessage()"/>
+          <button class="ta-send" onclick="sendTaMessage()">SEND</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT TOP: Risk -->
+    <div class="panel">
+      <div class="ph"><div class="ph-dot" style="background:var(--red)"></div><span class="ph-title">Risk Score</span></div>
+      <div class="pb" id="risk-body">
+        <div class="risk-center">
+          <div class="risk-num" id="rnum" style="color:var(--text3)">—</div>
+          <div class="risk-grade" id="rgrade">AWAITING</div>
+        </div>
+        <div class="risk-bar-g">
+          <div class="rb-row"><span>GNN Illicit Prob</span><span id="rb-gnn-v">—</span></div>
+          <div class="rb-track"><div class="rb-fill rb-gnn" id="rb-gnn" style="width:0"></div></div>
+        </div>
+        <div class="risk-bar-g">
+          <div class="rb-row"><span>Anomaly Score</span><span id="rb-anom-v">—</span></div>
+          <div class="rb-track"><div class="rb-fill rb-anom" id="rb-anom" style="width:0"></div></div>
+        </div>
+        <div class="risk-bar-g">
+          <div class="rb-row"><span>Sanctions</span><span id="rb-sanc-v">—</span></div>
+          <div class="rb-track"><div class="rb-fill rb-sanc" id="rb-sanc" style="width:0"></div></div>
+        </div>
+        <div class="shap-wrap" id="shap-wrap" style="display:none">
+          <div class="shap-ttl">SHAP EXPLANATION</div>
+          <div id="shap-rows"></div>
+        </div>
+        <div id="ipfs-area"></div>
+      </div>
+    </div>
+
+    <!-- LEFT BOTTOM: Tool Execution -->
+    <div class="panel">
+      <div class="ph"><div class="ph-dot" style="background:var(--blue)"></div><span class="ph-title">Tool Execution</span><span class="ph-right" id="tcnt">0 calls</span></div>
+      <div class="pb" id="tool-body"></div>
+    </div>
+
+    <!-- RIGHT BOTTOM: Anomaly + Hypothesis -->
+    <div class="panel">
+      <div class="ph"><div class="ph-dot" style="background:var(--amber)"></div><span class="ph-title">Anomaly · Hypothesis</span></div>
+      <div class="pb" id="right-body">
+        <div id="sanc-area"></div>
+        <div class="anom-grid" id="anom-grid"></div>
+        <div class="sec-lbl">HYPOTHESIS</div>
+        <div id="hyp-list"></div>
+        <div class="sec-lbl">AGENT MEMORY</div>
+        <div id="mem-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hud-logbar">
+    <div class="hud-log" id="hlog"></div>
+    <!-- Label Intelligence Feed — between event log and LLM output -->
+    <div class="hud-labels">
+      <div class="lf-hdr">
+        <div class="lf-hdr-left"><div class="lf-dot"></div><span>LABEL TAHRIX INTEL</span></div>
+        <span id="lf-count" style="color:var(--text3);font-size:7.5px"></span>
+      </div>
+      <div class="lf-body" id="lf-body">
+        <div class="lf-empty" id="lf-empty">NO LABELS YET</div>
+      </div>
+    </div>
+    <div class="hud-llm">
+      <div class="llm-hdr"><div class="llm-hdr-dot"></div>LLM OUTPUT</div>
+      <div class="llm-body" id="llm-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary overlay -->
+<div class="summary-overlay" id="sum-overlay">
+  <div class="summary-box">
+    <div class="sum-title">▶ INVESTIGATION COMPLETE</div>
+    <div class="sum-verdict" id="sum-verdict">—</div>
+    <div class="sum-meta" id="sum-meta"></div>
+    <div class="sum-text" id="sum-text"></div>
+    <div class="sum-acts">
+      <button class="btn-primary" style="font-size:9px;padding:9px 18px" onclick="document.getElementById('sum-overlay').style.display='none'">VIEW GRAPH</button>
+      <button class="btn-sec" onclick="show('s-input')">← NEW INVESTIGATION</button>
+    </div>
+  </div>
+</div>
+
+<!-- Label Submit Modal -->
+<div class="lbl-overlay" id="lbl-overlay" onclick="if(event.target===this)closeLabelModal()">
+  <div class="lbl-box">
+    <div class="lbl-hdr">
+      <span class="lbl-hdr-title">⊕ Submit Address Label</span>
+      <button class="lbl-close" onclick="closeLabelModal()">✕</button>
+    </div>
+    <div class="lbl-body">
+      <!-- Address + Chain -->
+      <div style="display:grid;grid-template-columns:1fr 100px;gap:8px">
+        <div class="lbl-field">
+          <label class="lbl-lbl">Address</label>
+          <input class="lbl-input" id="lbl-addr" type="text" placeholder="0x… or base58…" autocomplete="off"/>
+        </div>
+        <div class="lbl-field">
+          <label class="lbl-lbl">Chain</label>
+          <select class="lbl-input" id="lbl-chain">
+            <option value="ETH">ETH</option>
+            <option value="BTC">BTC</option>
+            <option value="SOL">SOL</option>
+            <option value="TRON">TRON</option>
+            <option value="BNB">BNB</option>
+            <option value="MATIC">MATIC</option>
+            <option value="ARB">ARB</option>
+            <option value="OP">OP</option>
+          </select>
+        </div>
+      </div>
+      <!-- Tags -->
+      <div class="lbl-field">
+        <label class="lbl-lbl">Tags</label>
+        <div class="lbl-tag-input-row">
+          <input class="lbl-input" id="lbl-tag-inp" type="text" placeholder="mixer, scam, exchange…" autocomplete="off"
+            onkeydown="if(event.key==='Enter'||event.key===','){event.preventDefault();addLabelTag()}"/>
+          <button class="btn-add-tag" onclick="addLabelTag()">+ ADD</button>
+        </div>
+        <div class="lbl-tags-wrap" id="lbl-tags-wrap"></div>
+      </div>
+      <!-- Chronology / PoC text -->
+      <div class="lbl-field">
+        <label class="lbl-lbl">PoC / Chronology</label>
+        <textarea class="lbl-input lbl-textarea" id="lbl-chron"
+          placeholder="Describe the incident, timeline, or paste proof-of-concept evidence…"></textarea>
+      </div>
+      <!-- File upload -->
+      <div class="lbl-field">
+        <label class="lbl-lbl">Evidence File <span style="color:var(--text3);font-size:7px">(TXT / CSV / JSON / PDF — max 1 MB)</span></label>
+        <div class="lbl-file-area" id="lbl-file-area"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleLabelFileDrop(event)">
+          <input type="file" id="lbl-file-input" accept=".txt,.csv,.json,.pdf,.md"
+            onchange="handleLabelFileSelect(event)"/>
+          <span style="font-size:9px;color:var(--text3);letter-spacing:1px">DRAG FILE HERE OR CLICK TO BROWSE</span>
+          <div class="lbl-file-name" id="lbl-file-name"></div>
+        </div>
+      </div>
+      <!-- Case link (optional) -->
+      <div class="lbl-field">
+        <label class="lbl-lbl">Link to Case <span style="color:var(--text3);font-size:7px">(optional)</span></label>
+        <input class="lbl-input" id="lbl-caseid" type="text" placeholder="Case UUID (auto-filled if active)" autocomplete="off"/>
+      </div>
+      <!-- LLM audit result -->
+      <div class="lbl-audit" id="lbl-audit">
+        <div class="lbl-audit-verdict" id="lbl-audit-verdict"></div>
+        <div class="lbl-audit-sum" id="lbl-audit-sum"></div>
+        <div class="lbl-audit-flags" id="lbl-audit-flags"></div>
+      </div>
+    </div>
+    <div class="lbl-footer">
+      <button class="btn-lbl-submit" id="btn-lbl-submit" onclick="submitLabel()">SUBMIT &amp; AUDIT</button>
+      <span class="lbl-status" id="lbl-status"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Config ───────────────────────────────────────────────
+const API = 'https://tahrix.serveousercontent.com/api/v1';
+let TOKEN = '', caseId = null, caseNum = null, caseAddr = null, caseChain = null, caseIterations = 5, caseObj = null;
+let timerInt = null, timerStart = null;
+let pollInt = null, graphInt = null, labelInt = null, lastEventId = 0, toolCnt = 0;
+let _pollCount = 0, _queuedMsgShown = false;
+let selectedAddrs = [], resolvedList = [];
+let activeFilters = new Set(['Wallet','Transaction','Entity','OsintNode','ThreatIntel','AnomalyPattern']);
+let sim = null, memData = {txs:0, addrs:0, bridges:0};
+let _lastGraphNodes = [];  // cache for auto-label connected node scan
+let finalSummary = '';
+
+const ANOM = [
+  ['P01','MIXER'],['P02','LAYERING'],['P03','FAN_OUT'],['P04','FAN_IN'],
+  ['P05','PEELING'],['P06','ROUND_TRIP'],['P07','BRIDGE_HOP'],['P08','WHALE'],
+  ['P09','DORMANT'],['P10','RAPID'],['P11','OFAC_IND'],['P12','DEX_WASH'],
+  ['P13','NFT_WASH'],['P14','FLASH_LOAN'],['P15','ADDR_POISON'],['P16','RUG_PULL'],['P17','SANDWICH'],
+];
+
+const NODE_CLR = {
+  Wallet:'#3b82f6', Transaction:'#475569', Entity:'#10b981',
+  OsintNode:'#f59e0b', ThreatIntel:'#ef4444',
+  AnomalyPattern:'#8b5cf6', ChainNetwork:'#06b6d4',
+  // OSINT sources
+  'sherlock':'#3b82f6',     // Blue - social media
+  'theharvester':'#10b981', // Green - email/subdomain
+  'blockchair':'#8b5cf6',  // Purple - blockchain
+  'web_search':'#f59e0b',  // Yellow - general web
+  'social_media':'#ec4899', // Pink - social media intel
+};
+
+// ─── Helpers ──────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const shortA = a => !a?'—': a.length<=18?a: a.slice(0,8)+'…'+a.slice(-6);
+const now8  = () => { const d=new Date(); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}` };
+
+// ─── Node Detail Drawer ───────────────────────────────────────────────────────
+let _drawerNode = null;
+
+function openNodeDrawer(d){
+  const drawer = $('node-drawer');
+  const pill   = $('nd-type-pill');
+  const body   = $('nd-body');
+  // Use source-specific color for OsintNode
+  const color = d.type === 'OsintNode' && d.source ? (NODE_CLR[d.source] || NODE_CLR['OsintNode']) : (NODE_CLR[d.type] || '#94a3b8');
+
+  _drawerNode = d;
+  pill.textContent = d.type.toUpperCase();
+  pill.style.color = color;
+  pill.style.borderColor = color;
+
+  // ── Build content ────────────────────────────────────────
+  const row = (k,v,mono=false) => v!=null&&v!==''
+    ? `<div class="nd-row"><span class="nd-k">${esc(k)}</span><span class="nd-v${mono?' nd-mono':''}">${esc(String(v))}</span></div>`
+    : '';
+  const section = t => `<div class="nd-section">${esc(t)}</div>`;
+
+  let html = '';
+
+  // ── Identification
+  html += section('Identification');
+  const fullId = d.address || d.hash || d.id || '—';
+  html += `<div class="nd-row"><span class="nd-k">Full ID</span><span class="nd-v nd-mono" style="word-break:break-all">${esc(fullId)}</span></div>`;
+  html += row('Type', d.type);
+  html += row('Chain', d.chain);
+  if(d.node_type && d.node_type !== d.type) html += row('Node type', d.node_type);
+
+  // ── Badges
+  const badges = (d.is_sanctioned ? `<span class="nd-badge nd-sanc">⚠ SANCTIONED</span>` : '')
+               + (d.is_focal      ? `<span class="nd-badge nd-focal">◎ FOCAL</span>` : '')
+               + (d.is_contract   ? `<span class="nd-badge nd-contract">CONTRACT</span>` : '');
+  if(badges) html += `<div style="margin:5px 0 2px">${badges}</div>`;
+
+  // ── Type-specific detail blocks
+  if(d.type === 'Wallet'){
+    html += section('Risk & Classification');
+    if(d.risk_score != null){
+      const pct = (d.risk_score * 100).toFixed(1);
+      const rclr = d.risk_score >= 0.9 ? '#ef4444' : d.risk_score >= 0.6 ? '#f59e0b' : d.risk_score >= 0.3 ? '#eab308' : '#10b981';
+      html += `<div class="nd-row"><span class="nd-k">Risk score</span><span class="nd-v" style="color:${rclr};font-weight:600">${pct}%</span></div>`;
+      html += `<div class="nd-risk-bar"><div class="nd-risk-fill" style="width:${pct}%;background:${rclr}"></div></div>`;
+    }
+    html += row('GNN label', d.gnn_label);
+    html += row('Entity label', d.entity_label);
+    html += row('Entity type', d.entity_type);
+
+    html += section('On-Chain Metrics');
+    html += row('TX count', d.tx_count != null ? Number(d.tx_count).toLocaleString() : null);
+    html += row('Balance USD', d.balance_usd != null ? '$' + Number(d.balance_usd).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : null);
+    html += row('Total sent', d.total_sent != null ? '$' + Number(d.total_sent).toFixed(2) : null);
+    html += row('Total recv', d.total_received != null ? '$' + Number(d.total_received).toFixed(2) : null);
+    html += row('First seen', d.first_seen ? d.first_seen.slice(0,19) : null);
+    html += row('Last active', d.last_active ? d.last_active.slice(0,19) : null);
+
+    html += section('Flags');
+    html += row('Is contract', d.is_contract ? 'Yes' : (d.is_contract === false ? 'No' : null));
+    html += row('Is sanctioned', d.is_sanctioned ? '⚠ YES' : 'No');
+    html += row('Mixer involved', d.mixer_involved ? 'Yes' : null);
+    html += row('OFAC program', d.ofac_program);
+
+  } else if(d.type === 'Transaction'){
+    html += section('Value');
+    html += row('Value USD', d.value_usd != null ? '$' + Number(d.value_usd).toLocaleString(undefined,{minimumFractionDigits:4}) : null);
+    html += row('Value native', d.value_native);
+    html += row('Asset', d.asset);
+    html += row('Fee USD', d.fee_usd != null ? '$' + Number(d.fee_usd).toFixed(4) : null);
+
+    html += section('Transaction');
+    html += row('Method', d.method);
+    html += row('Status', d.status);
+    html += row('Block', d.block_number);
+    html += row('Timestamp', d.timestamp ? d.timestamp.slice(0,19) : null);
+    html += row('Confirmations', d.confirmations);
+    html += row('From', d.from_address, true);
+    html += row('To', d.to_address, true);
+
+  } else if(d.type === 'Entity'){
+    html += section('Entity');
+    html += row('Name', d.name);
+    html += row('Entity type', d.entity_type);
+    html += row('Risk level', d.risk_level);
+    html += row('Source', d.source);
+    html += row('URL', d.url ? d.url.slice(0,80) : null);
+    html += row('Description', d.description ? d.description.slice(0,200) : null);
+
+  } else if(d.type === 'OsintNode'){
+    html += section('OSINT Record');
+    html += row('Source', d.source);
+    html += row('Platform', d.platform);
+    html += row('Entity', d.entity_ref);
+    html += row('URL', d.url ? d.url.slice(0,80) : null);
+    html += row('Retrieved', d.retrieved_at ? d.retrieved_at.slice(0,19) : null);
+    // Add badge for source type
+    if(d.source === 'sherlock'){
+      html += `<div style="margin:5px 0"><span class="nd-badge" style="background:#3b82f6;color:#fff;padding:2px 8px;border-radius:4px;font-size:10px">SOCIAL MEDIA</span></div>`;
+    } else if(d.source === 'theharvester'){
+      html += `<div style="margin:5px 0"><span class="nd-badge" style="background:#10b981;color:#fff;padding:2px 8px;border-radius:4px;font-size:10px">EMAIL/SUBDOMAIN</span></div>`;
+    } else if(d.source === 'blockchair'){
+      html += `<div style="margin:5px 0"><span class="nd-badge" style="background:#8b5cf6;color:#fff;padding:2px 8px;border-radius:4px;font-size:10px">BLOCKCHAIN</span></div>`;
+    }
+    if(d.snippet){
+      html += section('Content');
+      html += `<div class="nd-snip">${esc(d.snippet.slice(0,500))}</div>`;
+    }
+    // Show full URL if truncated
+    if(d.url && d.url.length > 80){
+      html += section('Full URL');
+      html += `<div class="nd-snip" style="font-size:9px;word-break:break-all">${esc(d.url)}</div>`;
+    }
+
+  } else if(d.type === 'ThreatIntel'){
+    html += section('Threat');
+    html += row('Threat type', d.threat_type);
+    if(d.severity != null){
+      const pct = (d.severity * 100).toFixed(0);
+      const rclr = d.severity >= 0.8 ? '#ef4444' : d.severity >= 0.5 ? '#f59e0b' : '#eab308';
+      html += `<div class="nd-row"><span class="nd-k">Severity</span><span class="nd-v" style="color:${rclr};font-weight:600">${pct}%</span></div>`;
+      html += `<div class="nd-risk-bar"><div class="nd-risk-fill" style="width:${pct}%;background:${rclr}"></div></div>`;
+    }
+    html += row('Source', d.source);
+    html += row('Confirmed', d.confirmed != null ? (d.confirmed ? '✓ Yes' : '✗ No') : null);
+    html += row('First seen', d.first_seen ? d.first_seen.slice(0,19) : null);
+    html += row('URL', d.url ? d.url.slice(0,80) : null);
+    if(d.description){
+      html += section('Description');
+      html += `<div class="nd-snip">${esc(d.description.slice(0,400))}</div>`;
+    }
+
+  } else if(d.type === 'AnomalyPattern'){
+    html += section('Anomaly Pattern');
+    html += row('Code', d.code);
+    if(d.severity != null){
+      const pct = (d.severity * 100).toFixed(0);
+      const rclr = '#8b5cf6';
+      html += `<div class="nd-row"><span class="nd-k">Severity</span><span class="nd-v" style="color:${rclr};font-weight:600">${pct}%</span></div>`;
+      html += `<div class="nd-risk-bar"><div class="nd-risk-fill" style="width:${pct}%;background:${rclr}"></div></div>`;
+    }
+    html += row('Case ID', d.case_id, true);
+    if(d.description){
+      html += section('Description');
+      html += `<div class="nd-snip">${esc(d.description.slice(0,400))}</div>`;
+    }
+
+  } else if(d.type === 'ChainNetwork'){
+    html += section('Network');
+    html += row('Name', d.name);
+    html += row('Chain ID', d.chain_id);
+    html += row('Symbol', d.symbol);
+  }
+
+  // ── Raw node ID footer
+  html += section('Node Reference');
+  html += `<div style="font-family:monospace;font-size:7.5px;color:var(--text3);word-break:break-all">${esc(d.id||'')}</div>`;
+
+  body.innerHTML = html;
+
+  // Animate open
+  drawer.classList.remove('nd-closing');
+  drawer.classList.add('nd-open');
+}
+
+function closeNodeDrawer(){
+  const drawer = $('node-drawer');
+  if(!drawer.classList.contains('nd-open')) return;
+  drawer.classList.remove('nd-open');
+  drawer.classList.add('nd-closing');
+  drawer.addEventListener('animationend', ()=>{
+    drawer.classList.remove('nd-closing');
+    _drawerNode = null;
+  }, {once:true});
+}
+
+// ─── Tahrix Agent Chat ────────────────────────────────────────────────────────
+let _taHistory = [];
+
+function toggleTahrixAgent(){
+  const panel = $('tahrix-agent');
+  const btn = $('ta-toggle');
+  panel.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+function addTaMessage(content, isUser = false){
+  const body = $('ta-body');
+  const role = isUser ? 'YOU' : 'TAHRIX AGENT';
+  const div = document.createElement('div');
+  div.className = 'ta-msg ' + (isUser ? 'user' : 'agent');
+  div.innerHTML = `<span class="ta-msg-role">${role}</span><div class="ta-msg-content">${esc(content)}</div>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+async function sendTaMessage(){
+  const input = $('ta-input');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addTaMessage(msg, true);
+  input.value = '';
+  
+  // Show loading
+  const body = $('ta-body');
+  const loading = document.createElement('div');
+  loading.id = 'ta-loading';
+  loading.className = 'ta-loading';
+  loading.textContent = 'Thinking...';
+  body.appendChild(loading);
+  body.scrollTop = body.scrollHeight;
+  
+  // Process message and generate response
+  const response = await processTaMessage(msg);
+  
+  // Remove loading
+  if($('ta-loading')) $('ta-loading').remove();
+  
+  addTaMessage(response, false);
+}
+
+async function processTaMessage(msg){
+  console.log('processTaMessage called with:', msg);
+  // Always use the LLM API for responses
+  try{
+    console.log('Calling API:', `${API}/agent/chat`);
+    const resp = await fetch(`${API}/agent/chat`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body:JSON.stringify({message:msg, case_id:caseId||null})
+    });
+    console.log('Response status:', resp.status);
+    if(resp.ok){
+      const data = await resp.json();
+      console.log('Response data:', data);
+      return data.response || 'No response from AI';
+    } else {
+      const errText = await resp.text();
+      console.log('Error response:', errText);
+      return 'Error: ' + errText;
+    }
+  }catch(e){
+    console.log('LLM API error:', e);
+    return 'Error: ' + e.message;
+  }
+}
+
+function getCaseSummary(){
+  if(!caseObj) return 'No active case. Start an investigation first.';
+  return `📋 CASE SUMMARY
+
+Address: ${caseObj.input_address || '—'}
+Chain: ${caseObj.input_chain || '—'}
+Status: ${caseObj.status || '—'}
+Risk Score: ${caseObj.risk_score?.toFixed(1) || '—'}/100
+Risk Grade: ${caseObj.risk_grade || '—'}
+GNN Score: ${caseObj.gnn_score?.toFixed(4) || '—'}
+Anomalies: ${(caseObj.anomaly_codes || []).join(', ') || 'None'}
+Sanctions: ${caseObj.sanctions_hit ? '⚠️ HIT' : '✅ Clear'}
+Iterations: ${caseObj.iterations || 0}
+Confidence: ${((caseObj.confidence || 0)*100).toFixed(0)}%
+
+${caseObj.summary ? '\n' + caseObj.summary.slice(0,300) : ''}`;
+}
+
+function getGraphInfo(){
+  if(!_lastGraphNodes || !_lastGraphEdges) return 'No graph data yet.';
+  const types = {};
+  _lastGraphNodes.forEach(n => {
+    types[n.node_type || n.type] = (types[n.node_type || n.type] || 0) + 1;
+  });
+  return `🔗 GRAPH INFO
+
+Total Nodes: ${_lastGraphNodes.length}
+Total Edges: ${_lastGraphEdges.length}
+
+Node Types:
+${Object.entries(types).map(([k,v]) => `• ${k}: ${v}`).join('\n')}
+
+You can ask about specific nodes or their connections.`;
+}
+
+function getRiskDetails(){
+  if(!caseObj) return 'No active case.';
+  return `⚠️ RISK ANALYSIS
+
+Risk Score: ${caseObj.risk_score?.toFixed(1) || '—'}/100
+Grade: ${caseObj.risk_grade || '—'}
+GNN Illicit Probability: ${caseObj.gnn_score?.toFixed(4) || '—'}
+Anomaly Score: ${(caseObj.anomaly_score || 0).toFixed(2)}
+Anomaly Codes: ${(caseObj.anomaly_codes || []).join(', ') || 'None'}
+Sanctions: ${caseObj.sanctions_hit ? 'OFAC SDN MATCH' : 'None'}
+
+The risk score combines GNN ML model, anomaly patterns, threat intelligence, and sanctions checks.`;
+}
+
+function getNodeList(){
+  if(!_lastGraphNodes || _lastGraphNodes.length === 0) return 'No nodes in graph yet.';
+  const list = _lastGraphNodes.slice(0,15).map(n => {
+    const type = n.node_type || n.type || 'Unknown';
+    const addr = n.address || n.id || '—';
+    const label = addr.length > 30 ? addr.slice(0,12)+'...'+addr.slice(-6) : addr;
+    return `• ${type}: ${label}`;
+  }).join('\n');
+  return `📌 NODE LIST (showing first 15 of ${_lastGraphNodes.length})
+
+${list}
+
+Ask about a specific node type or address for details.`;
+}
+
+async function getEvents(){
+  if(!caseId) return 'No active case.';
+  try{
+    const r = await fetch(`${API}/cases/${caseId}/events`, {headers:{'Authorization':'Bearer '+TOKEN}});
+    if(!r.ok) return 'Failed to fetch events.';
+    const evs = await r.json();
+    const recent = evs.slice(-10).map(e => `• ${e.phase} (iter ${e.iteration}): ${e.tool || '—'}`).join('\n');
+    return `📜 RECENT EVENTS (last 10 of ${evs.length})
+
+${recent}`;
+  }catch(e){
+    return 'Error fetching events: ' + e.message;
+  }
+}
+
+async function getLabels(){
+  try{
+    const r = await fetch(`${API}/labels?limit=50`, {headers:{'Authorization':'Bearer '+TOKEN}});
+    if(!r.ok) return 'Failed to fetch labels.';
+    const labels = await r.json();
+    if(!labels.length) return 'No labels in database.';
+    const list = labels.slice(0,8).map(l => `• ${l.address?.slice(0,10)}... (${l.chain}): ${(l.tags||[]).join(', ')}`).join('\n');
+    return `🏷 TAHRIX INTEL (${labels.length} total, showing 8)
+
+${list}
+
+Labels include community-contributed intelligence about wallet addresses, exchanges, mixers, and threat actors.`;
+  }catch(e){
+    return 'Error fetching labels: ' + e.message;
+  }
+}
+
+function getToolList(){
+  return `🛠 AVAILABLE TOOLS
+
+Investigation:
+• get_eth_transactions - ETH/EVM TX history
+• get_sol_transactions - Solana TX history  
+• get_btc_transactions - Bitcoin TX history
+• get_tron_transactions - TRON TX history
+• trace_forward / trace_backward - Counterparty mapping
+• expand_counterparties - Depth expansion
+
+Risk Analysis:
+• check_sanctions - OFAC SDN check
+• detect_anomaly - 17 pattern detectors
+• run_gnn_inference - ML illicit probability
+• darkweb_monitor - Threat intel
+
+OSINT:
+• web_search - DuckDuckGo search
+• whois_lookup - Domain/IP WHOIS
+• social_media_intel - Twitter/Reddit mentions
+• sherlock_username - Username search
+• theharvester - Email/subdomain enum
+
+Ask me to run any of these tools!`;
+}
+
+function getAddressInfo(){
+  if(!caseAddr) return 'No active case address.';
+  return `📍 ADDRESS INFO
+
+Current Case: ${caseAddr}
+Chain: ${caseChain || '—'}
+
+I can help investigate this address using on-chain tools (transactions, counterparty tracing) and OSINT tools (search, social media, WHOIS).
+
+Would you like me to fetch transactions, check for threat intel, or search for associated entities?`;
+}
+
+function getTxInfo(){
+  return `Transaction Info
+
+To view transactions for the current case, I need to fetch from the blockchain. 
+
+The case must have transactions collected through:
+• get_eth_transactions (Ethereum/Base/Polygon/BSC/Arbitrum)
+• get_sol_transactions (Solana)
+• get_btc_transactions (Bitcoin)
+• get_tron_transactions (TRON)
+
+Ask me to "get transactions" or "analyze counterparty" to trigger these tools.`;
+}
+
+async function taQuickAction(action){
+  console.log('taQuickAction called:', action);
+  let response = '';
+  try{
+    switch(action){
+      case 'summary': response = getCaseSummary(); break;
+      case 'graph': response = getGraphInfo(); break;
+      case 'risk': response = getRiskDetails(); break;
+      case 'nodes': response = getNodeList(); break;
+      case 'events': response = await getEvents(); break;
+      case 'labels': response = await getLabels(); break;
+      default: response = 'Unknown action: ' + action;
+    }
+  }catch(e){
+    response = 'Error: ' + e.message;
+  }
+  console.log('Quick action response:', response.slice(0,100));
+  addTaMessage(response, false);
+}
+
+// ─── Label Modal ──────────────────────────────────────────────────────────────
+let _labelTags = [];
+let _labelFileContent = null;
+let _labelFileName = null;
+let _labelFileMime = null;
+
+function openLabelModal(){
+  // Pre-fill address from active case
+  if(caseAddr) $('lbl-addr').value = caseAddr;
+  if(caseChain) $('lbl-chain').value = caseChain;
+  if(caseId) $('lbl-caseid').value = caseId;
+  // Reset state
+  _labelTags = [];
+  _labelFileContent = null; _labelFileName = null; _labelFileMime = null;
+  $('lbl-tags-wrap').innerHTML = '';
+  $('lbl-chron').value = '';
+  $('lbl-file-name').textContent = '';
+  $('lbl-status').textContent = '';
+  $('lbl-audit').classList.remove('show');
+  $('btn-lbl-submit').disabled = false;
+  $('lbl-overlay').classList.add('open');
+}
+
+function closeLabelModal(){
+  $('lbl-overlay').classList.remove('open');
+}
+
+function addLabelTag(){
+  const inp = $('lbl-tag-inp');
+  const raw = inp.value.trim().replace(/,+$/, '').trim();
+  if(!raw) return;
+  const tags = raw.split(/[,\s]+/).map(t=>t.trim().toLowerCase()).filter(Boolean);
+  tags.forEach(t => {
+    if(!_labelTags.includes(t) && _labelTags.length < 20){
+      _labelTags.push(t);
+    }
+  });
+  inp.value = '';
+  renderLabelTags();
+}
+
+function removeLabelTag(tag){
+  _labelTags = _labelTags.filter(t => t !== tag);
+  renderLabelTags();
+}
+
+function renderLabelTags(){
+  const wrap = $('lbl-tags-wrap');
+  wrap.innerHTML = '';
+  _labelTags.forEach(t => {
+    const el = document.createElement('span');
+    el.className = 'lbl-tag';
+    el.innerHTML = `${esc(t)}<span class="lbl-tag-rm" onclick="removeLabelTag('${esc(t)}')" title="Remove">×</span>`;
+    wrap.appendChild(el);
+  });
+}
+
+function handleLabelFileSelect(evt){
+  const file = evt.target.files[0];
+  if(file) _readLabelFile(file);
+}
+
+function handleLabelFileDrop(evt){
+  evt.preventDefault();
+  $('lbl-file-area').classList.remove('drag');
+  const file = evt.dataTransfer.files[0];
+  if(file) _readLabelFile(file);
+}
+
+function _readLabelFile(file){
+  if(file.size > 1_048_576){
+    $('lbl-file-name').textContent = '✕ File too large (max 1 MB)';
+    return;
+  }
+  _labelFileName = file.name;
+  _labelFileMime = file.type || 'text/plain';
+  const reader = new FileReader();
+  reader.onload = e => {
+    _labelFileContent = e.target.result;
+    $('lbl-file-name').textContent = '✓ ' + file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
+  };
+  // Read as text for text-based types, base64 for binary (PDF)
+  if(_labelFileMime === 'application/pdf'){
+    reader.readAsDataURL(file);  // base64 data-URI
+  } else {
+    reader.readAsText(file, 'utf-8');
+  }
+}
+
+async function submitLabel(){
+  const addr = $('lbl-addr').value.trim();
+  const chain = $('lbl-chain').value;
+  if(!addr){ $('lbl-status').textContent = '✕ Address is required'; return; }
+
+  const btn = $('btn-lbl-submit');
+  const status = $('lbl-status');
+  btn.disabled = true;
+  status.textContent = '⟳ Submitting & auditing…';
+  $('lbl-audit').classList.remove('show');
+
+  const body = {
+    address: addr,
+    chain: chain,
+    tags: _labelTags,
+    chronology: $('lbl-chron').value.trim() || null,
+    poc_filename: _labelFileName || null,
+    poc_content: _labelFileContent || null,
+    poc_mimetype: _labelFileMime || null,
+    case_id: $('lbl-caseid').value.trim() || null,
+  };
+
+  try {
+    const r = await fetch(`${API}/labels`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+      body: JSON.stringify(body),
+    });
+    const data = await r.json();
+    if(!r.ok) throw new Error(data?.detail || data?.error?.message || r.status);
+
+    // Show audit result
+    const verdict = data.audit_verdict || 'INCONCLUSIVE';
+    const conf = data.audit_confidence != null ? (data.audit_confidence * 100).toFixed(0) + '%' : '—';
+    const summary = data.audit_summary || '—';
+    const flags = (data.audit_flags || []).join(' · ');
+
+    $('lbl-audit-verdict').innerHTML =
+      `<span class="v-${verdict}">${verdict}</span>` +
+      `<span style="color:var(--text3);font-weight:400;margin-left:8px">confidence ${conf}</span>`;
+    $('lbl-audit-sum').textContent = summary;
+    $('lbl-audit-flags').textContent = flags ? '⚑ ' + flags : '';
+    $('lbl-audit').classList.add('show');
+
+    status.textContent = '✓ Label stored — ID ' + String(data.id).slice(0,8) + '…';
+    // Refresh the label feed with the submitted address
+    fetchAndRenderLabelFeed(body.address);
+    btn.disabled = false;
+    btn.textContent = 'SUBMIT ANOTHER';
+    btn.onclick = () => {
+      $('lbl-addr').value = '';
+      $('lbl-chron').value = '';
+      _labelTags = []; renderLabelTags();
+      _labelFileContent = null; _labelFileName = null;
+      $('lbl-file-name').textContent = '';
+      $('lbl-audit').classList.remove('show');
+      status.textContent = '';
+      btn.textContent = 'SUBMIT & AUDIT';
+      btn.onclick = submitLabel;
+    };
+  } catch(e){
+    status.textContent = '✕ ' + e.message;
+    btn.disabled = false;
+  }
+}
+
+// Wire close button (runs once after DOM ready)
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  $(id).classList.remove('hidden');
+}
+
+function summarize(r){
+  if(r==null) return '';
+  if(typeof r==='string') return r.slice(0,80);
+  if(r.error) return '✕ '+r.error;
+  if(r.unavailable) return '— unavailable: '+r.reason;
+  if(r.sanctioned!=null) return r.sanctioned?'🔴 SANCTIONED':'✓ clear';
+  if(r.count!=null) return `${r.count} result${r.count!==1?'s':''}`;
+  if(r.score!=null) return `score ${r.score.toFixed?r.score.toFixed(3):r.score}`;
+  if(r.threats) return `${r.threats.length} threats · maxSev ${(r.max_severity||0).toFixed(2)}`;
+  if(r.deferred) return 'report queued';
+  const keys=Object.keys(r).slice(0,3);
+  return keys.map(k=>`${k}:${String(r[k]).slice(0,10)}`).join(' ');
+}
+
+// ─── Login ────────────────────────────────────────────────
+$('li-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin() });
+async function doLogin(){
+  const email=$('li-email').value.trim(), pass=$('li-pass').value;
+  $('li-err').textContent='';
+  if(!email||!pass){ $('li-err').textContent='Enter credentials.'; return }
+  $('li-btn').textContent='[ AUTHENTICATING... ]';
+  try{
+    const r=await fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.detail||d.message||'Auth failed');
+    TOKEN=d.access_token;
+    show('s-input'); $('main-in').focus();
+  }catch(e){ $('li-err').textContent='✕ '+e.message; }
+  finally{ $('li-btn').textContent='[ ACCESS SYSTEM ]'; }
+}
+
+// ─── Input ────────────────────────────────────────────────
+function setInput(v){ $('main-in').value=v; $('main-in').focus(); }
+$('main-in').addEventListener('keydown', e=>{ if(e.key==='Enter') startFlow(); });
+
+function detectDirect(raw){
+  if(/^0x[0-9a-fA-F]{40}$/.test(raw)) return {address:raw.toLowerCase(),chain:'ETH'};
+  if(/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(raw)) return {address:raw,chain:'TRON'};
+  if(/^bc1[02-9ac-hj-np-z]{6,87}$/i.test(raw)) return {address:raw,chain:'BTC'};
+  if(/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(raw)) return {address:raw,chain:'BTC'};
+  if(/^[1-9A-HJ-NP-Za-km-z]{43,44}$/.test(raw)) return {address:raw,chain:'SOL'};
+  return null;
+}
+
+async function startFlow(){
+  const raw=$('main-in').value.trim();
+  if(!raw){ $('inv-err').textContent='Enter something to investigate.'; return; }
+  $('inv-err').textContent='';
+  const depth=parseInt($('depth-r').value)||3;
+  const iterations=parseInt($('iter-r').value)||5;
+  const btn=$('inv-btn'); btn.classList.add('ld'); btn.disabled=true;
+  const direct=detectDirect(raw);
+  if(direct){
+    btn.classList.remove('ld'); btn.disabled=false;
+    await createCase(direct.address, direct.chain, depth, iterations);
+    return;
+  }
+  // Need resolve
+  $('re-entity').textContent=`"${raw}"`;
+  resetRSteps();
+  show('s-resolve');
+  btn.classList.remove('ld'); btn.disabled=false;
+  await animRStep(0,'done');
+  await animRStep(1,'active');
+  try{
+    const r=await fetch(`${API}/resolve`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${TOKEN}`},body:JSON.stringify({input:raw,max_results:8})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.detail||'Resolve failed');
+    await animRStep(1,'done'); await sleep(200);
+    await animRStep(2,'active'); await sleep(300);
+    await animRStep(2,'done'); await sleep(200);
+    await animRStep(3,'active'); await sleep(250);
+    await animRStep(3,'done');
+    resolvedList=d.resolved||[];
+    renderResolvedList(resolvedList, d.warnings||[]);
+  }catch(e){
+    $(`rs1`).className='rst err'; $(`rs1`).querySelector('.rst-ic').textContent='✕';
+    $(`rs1`).lastChild.textContent=' '+e.message;
+    $('re-acts').style.display='flex';
+  }
+}
+
+function resetRSteps(){
+  $('re-list').innerHTML=''; $('re-acts').style.display='none';
+  ['rs0','rs1','rs2','rs3'].forEach((id,i)=>{
+    const el=$(id); el.className='rst'+(i===0?' active':'');
+    el.querySelector('.rst-ic').textContent=i===0?'⟳':'○';
+  });
+}
+async function animRStep(i,state){
+  const el=$(`rs${i}`);
+  el.className=`rst ${state}`;
+  el.querySelector('.rst-ic').textContent=state==='done'?'✓':state==='active'?'⟳':'✕';
+  await sleep(120);
+}
+
+function renderResolvedList(list, warnings){
+  const el=$('re-list'); el.innerHTML='';
+  
+  // Filter out OSINT-only results (fake addresses like "OSINT-1") - cannot investigate
+  const validList = list.filter(a => !a.address.startsWith('OSINT-') && a.input_type !== 'osint_only');
+  const osintOnlyCount = list.length - validList.length;
+  
+  selectedAddrs = validList.length ? [...validList] : [];
+  
+  if(!list.length){
+    el.innerHTML=`<div style="color:var(--text3);font-size:10px">${warnings[0]||'No addresses found. Try a direct wallet address.'}</div>`;
+    $('re-acts').style.display='flex'; return;
+  }
+  
+  // Show input type context and OSINT-only warning
+  if(osintOnlyCount > 0){
+    el.innerHTML = `<div class="ev-box" style="border-left-color:var(--red)">⚠️ ${osintOnlyCount} results are OSINT-only (no wallet address found). Showing ${validList.length} valid address${validList.length !== 1 ? 'es' : ''}.</div>`;
+  }
+  if(list[0] && list[0].osint_evidence && list[0].osint_evidence.length && validList.length > 0){
+    const evidenceHtml = list[0].osint_evidence.slice(0,3).map(e=>{
+      const title = e.title || e.url.split('/').pop() || 'Source';
+      return `<a href="${e.url}" target="_blank" class="ev-link" title="${esc(e.snippet||'')}">• ${esc(title.slice(0,50))}</a>`;
+    }).join('');
+    el.innerHTML += `<div class="ev-box">OSINT Evidence: ${evidenceHtml}</div>`;
+  }
+  
+  if(!validList.length){
+    el.innerHTML += `<div style="color:var(--text3);font-size:10px;margin-top:10px">No valid wallet addresses found. Try a direct wallet address.</div>`;
+    $('re-acts').style.display='flex'; 
+    $('re-go').disabled = true;
+    $('re-hint').textContent = 'No valid addresses';
+    return;
+  }
+  
+  validList.forEach((a,i)=>{
+    const d=document.createElement('div');
+    d.className='res-addr sel'; d.dataset.i=i;
+    const evBadge = (a.osint_evidence && a.osint_evidence.length) 
+      ? `<span class="ev-badge">${a.osint_evidence.length} evidence</span>` 
+      : '';
+    d.innerHTML=`<span class="chain-badge c-${a.chain}">${a.chain}</span><span class="addr-txt">${shortA(a.address)}</span>${evBadge}<span class="addr-lbl">${esc(a.label||'')}</span><div class="conf-bar"><div class="conf-fill" style="width:${Math.round((a.confidence||0)*100)}%"></div></div>`;
+    d.onclick=()=>{
+      const sel=d.classList.toggle('sel');
+      selectedAddrs=sel?[...selectedAddrs,a]:selectedAddrs.filter(x=>x.address!==a.address);
+      updateReGoBtn();
+    };
+    el.appendChild(d);
+  });
+  updateReGoBtn(); $('re-acts').style.display='flex';
+}
+function updateReGoBtn(){
+  const n=selectedAddrs.length;
+  $('re-hint').textContent=`${n} selected`;
+  $('re-go').textContent=n?`[ INVESTIGATE ${n} ADDRESS${n>1?'ES':''} ]`:'[ SELECT ADDRESSES ]';
+  $('re-go').disabled=!n;
+}
+async function launchSelected(){
+  if(!selectedAddrs.length) return;
+  const depth=parseInt($('depth-r').value)||3;
+  const iterations=parseInt($('iter-r').value)||5;
+  
+  // Filter valid wallet addresses
+  const validAddrs = selectedAddrs.filter(a => 
+    !a.address.startsWith('OSINT-') && 
+    a.input_type !== 'osint_only'
+  );
+  
+  // If we have valid addresses, investigate the first one
+  if(validAddrs.length > 0){
+    await createCase(validAddrs[0].address, validAddrs[0].chain, depth, iterations);
+    return;
+  }
+  
+  // No valid addresses - user tried to investigate OSINT-only result
+  // Show helpful message
+  $('re-hint').textContent = 'No wallet addresses to investigate';
+  $('re-hint').style.color = 'var(--red)';
+  // Show alert
+  alert('No wallet addresses found. This entity has OSINT results but no associated blockchain addresses. Try searching with a known wallet address, or search on block explorers/social media first.');
+}
+
+async function autoInvestigate(){
+  console.log('autoInvestigate called');
+  const depth=parseInt($('depth-r').value)||3;
+  const iterations=parseInt($('iter-r').value)||5;
+  
+  // Get search term from input field FIRST (most reliable)
+  let searchTerm = '';
+  const inp = $('main-in');
+  if(inp && inp.value.trim()){
+    searchTerm = inp.value.trim();
+    console.log('searchTerm from input:', searchTerm);
+  }
+  
+  // Also try from resolvedList if available
+  if(!searchTerm && resolvedList && resolvedList.length > 0){
+    console.log('trying from resolvedList, length:', resolvedList.length);
+    const valid = resolvedList.filter(a => !a.address.startsWith('OSINT-') && a.input_type !== 'osint_only');
+    if(valid.length > 0){
+      console.log('valid from resolvedList:', valid[0].address);
+      await createCase(valid[0].address, valid[0].chain, depth);
+      return;
+    }
+    const osintItem = resolvedList.find(a => a.address.startsWith('OSINT-'));
+    if(osintItem && osintItem.label){
+      searchTerm = osintItem.label.replace('OSINT: ', '');
+      console.log('searchTerm from OSINT:', searchTerm);
+    }
+  }
+  
+  if(!searchTerm){
+    alert('Masukkan nama entity/username/alamat wallet dulu di input field');
+    return;
+  }
+  
+  // Show loading
+  show('s-resolve');
+  $('rs1').innerHTML='<span class="rst-ic">◐</span>Auto-investigating "'+searchTerm+'"...';
+  
+  // Resolve and get first valid address
+  try{
+    console.log('Calling resolve for:', searchTerm);
+    const r=await fetch(`${API}/resolve`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${TOKEN}`},body:JSON.stringify({input:searchTerm,max_results:5})});
+    const d=await r.json();
+    console.log('resolve response:', d);
+    const valid = (d.resolved || []).filter(a => !a.address.startsWith('OSINT-') && a.input_type !== 'osint_only');
+    console.log('valid addresses:', valid.length);
+    
+    // Use valid wallet OR use searchTerm directly for OSINT entities (NOT OSINT-1 placeholder)
+    if(valid.length > 0){
+      console.log('Creating case for wallet:', valid[0].address);
+      await createCase(valid[0].address, valid[0].chain, depth, iterations);
+    }else if((d.resolved || []).length > 0 && (d.resolved || [])[0].input_type === 'osint_only'){
+      // OSINT-only entity - use the original searchTerm, NOT 'ETH'
+      console.log('Creating OSINT case for:', searchTerm);
+      await createCase(searchTerm, 'OSINT', depth, iterations);
+    }else{
+      // No results at all - try direct as case name (assume OSINT entity)
+      console.log('No resolved results, using searchTerm as case');
+      await createCase(searchTerm, 'OSINT', depth, iterations);
+    }
+  }catch(e){
+    console.log('Error:', e);
+    $('rs1').innerHTML='<span class="rst-ic" style="color:var(--red)">✕</span>Error: '+e.message;
+  }
+}
+
+// ─── Create case ──────────────────────────────────────────
+async function createCase(address, chain, depth=3, iterations=5){
+  try{
+    const r=await fetch(`${API}/cases`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${TOKEN}`},body:JSON.stringify({address,chain,depth,iterations})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.detail||d.message||'Create case failed');
+    caseId=d.id; caseNum=d.case_number||d.id.slice(0,8);
+    caseAddr=d.input_address||address; caseChain=d.input_chain||chain;
+    caseIterations=iterations||5;
+    initHUD(); show('s-hud');
+    startTimer(); startPolling();
+    // Start incremental graph refresh every 8 s while investigation runs
+    graphInt = setInterval(fetchAndRenderGraph, 8000);
+    // Label feed: live refresh every 3 s, persists beyond investigation lifecycle
+    clearInterval(labelInt);
+    labelInt = setInterval(() => fetchAndRenderLabelFeed(caseAddr), 3000);
+  }catch(e){
+    $('inv-err').textContent='✕ '+e.message; show('s-input');
+  }
+}
+
+// ─── HUD init ─────────────────────────────────────────────
+function initHUD(){
+  toolCnt=0; lastEventId=0; memData={txs:0,addrs:0,bridges:0,osint:0,threats:0}; finalSummary='';
+  seenEventIds.clear(); _pollCount=0; _queuedMsgShown=false;
+  clearInterval(graphInt); graphInt=null;
+  $('hcnum').textContent=caseNum;
+  $('haddr').textContent=shortA(caseAddr);
+  const hc=$('hchain'); hc.textContent=caseChain; hc.className=`hud-ch c-${caseChain}`;
+  setStatus('PENDING');
+  $('iter-d').textContent='iter 0/'+caseIterations; $('tcnt').textContent='0 calls';
+  ['cog-body','tool-body','hlog','hyp-list','sanc-area','llm-body'].forEach(id=>$(id).innerHTML='');
+  // Label feed — always load from DB (transparency: never reset)
+  fetchAndRenderLabelFeed(caseAddr);
+  if($('lf-count')) $('lf-count').textContent='';
+  $('mem-list').innerHTML='';
+  $('rnum').textContent='—'; $('rnum').style.color='var(--text3)';
+  $('rgrade').textContent='AWAITING'; $('rgrade').className='risk-grade';
+  ['rb-gnn','rb-anom','rb-sanc'].forEach(id=>$(id).style.width='0%');
+  ['rb-gnn-v','rb-anom-v','rb-sanc-v'].forEach(id=>$(id).textContent='—');
+  $('shap-wrap').style.display='none'; $('ipfs-area').innerHTML='';
+  $('graph-empty').style.display='flex';
+  d3.select('#gg').selectAll('*').remove();
+  $('ginfo').textContent='0 nodes · 0 edges';
+  // Reset report button
+  const rBtn=$('btn-report');
+  if(rBtn){ rBtn.disabled=true; $('report-btn-txt').textContent='EXPORT REPORT ▾'; rBtn.classList.remove('creating'); }
+  buildAnomGrid();
+}
+
+// ─── Timer ────────────────────────────────────────────────
+function startTimer(){
+  timerStart=Date.now(); clearInterval(timerInt);
+  timerInt=setInterval(()=>{
+    const s=Math.floor((Date.now()-timerStart)/1000);
+    $('htimer').textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  },1000);
+}
+function setStatus(st){
+  const el=$('hstat'); el.textContent=st;
+  el.className='hud-st st-'+st.toLowerCase();
+  const dot=$('ldot'),lbl=$('llbl');
+  if(st==='COMPLETED'){dot.style.animation='none';dot.style.background='var(--green)';lbl.textContent='DONE';lbl.style.color='var(--green)';clearInterval(timerInt);}
+  else if(st==='FAILED'){dot.style.animation='none';dot.style.background='var(--red)';lbl.textContent='FAIL';lbl.style.color='var(--red)';clearInterval(timerInt);}
+  else if(st==='PENDING'||st==='QUEUED'){dot.style.animation='none';dot.style.background='var(--text3)';lbl.textContent='WAIT';lbl.style.color='var(--text3)';}
+  else if(st==='RUNNING'){dot.style.animation='pulse 1.5s infinite';dot.style.background='var(--green)';lbl.textContent='LIVE';lbl.style.color='var(--green)';}
+}
+
+// ─── Polling ─────────────────────────────────────────────
+function startPolling(){
+  clearInterval(pollInt);
+  pollInt = setInterval(pollOnce, 1500);
+  pollOnce();
+}
+
+async function pollOnce(){
+  if(!caseId||!TOKEN) return;
+  _pollCount++;
+  try{
+    const evResp=await fetch(`${API}/cases/${caseId}/events?since_id=${lastEventId}`,{headers:{'Authorization':`Bearer ${TOKEN}`}});
+    if(evResp.ok){
+      const evs=await evResp.json();
+      const list=Array.isArray(evs)?evs:(evs.events||[]);
+      list.forEach(ev=>{
+        if(ev.id>lastEventId) lastEventId=ev.id;
+        _queuedMsgShown=true;  // suppress queued msg once any event arrives
+        renderEvent(ev);
+      });
+    }
+    const cResp=await fetch(`${API}/cases/${caseId}`,{headers:{'Authorization':`Bearer ${TOKEN}`}});
+    if(cResp.ok){
+      const c=await cResp.json(); caseObj=c;
+      const st=(c.status||'').toUpperCase();
+      if(st==='IN_PROGRESS'||st==='RUNNING') setStatus('RUNNING');
+      // Show QUEUED indicator if worker hasn't started processing yet
+      if((st==='IN_PROGRESS'||st==='PENDING') && lastEventId===0 && _pollCount>=4 && !_queuedMsgShown){
+        _queuedMsgShown=true;
+        addCog('think','QUEUED','Waiting for worker slot — investigation queued…',0);
+        addLLMEntry('think','SYSTEM','Investigation is queued. Worker is busy with concurrent cases. Events will stream automatically when processing begins.');
+      }
+      updateHypothesis(c);
+      updateMemFromCase(c);
+      if(st==='COMPLETED'){
+        setStatus('COMPLETED'); clearInterval(pollInt); clearInterval(graphInt); graphInt=null;
+        if(c.risk_score!=null) applyRiskFromCase(c);
+        (c.anomaly_codes||[]).forEach(code=>activateAnom(code,0.75));
+        finalSummary=c.summary||'';
+        if(finalSummary && !$('llm-body').querySelector('.reflect')){
+          addLLMEntry('reflect', 'FINAL VERDICT', finalSummary);
+        }
+        updateHypothesis(c); updateMemFromCase(c);
+        const rBtn=$('btn-report');
+        if(rBtn){ rBtn.disabled=false; }
+        showSummary(c);
+        fetchAndRenderLabelFeed(c.input_address);
+        fetchAndRenderGraph();
+        setTimeout(()=>autoLabelIfHighRisk(c), 3000);
+      }
+      if(st==='FAILED'){ setStatus('FAILED'); clearInterval(pollInt); clearInterval(graphInt); graphInt=null; }
+    }
+  }catch(e){}
+}
+
+// ─── Event rendering ──────────────────────────────────────
+const pendingTools={};  // name -> key
+const seenEventIds=new Set();
+
+function renderEvent(ev){
+  // De-duplicate: same DB row can arrive via two poll cycles
+  if(ev.id && seenEventIds.has(ev.id)) return;
+  if(ev.id) seenEventIds.add(ev.id);
+
+  const phase=(ev.phase||'').toUpperCase();
+  const tool=ev.tool||'';
+  const payload=ev.payload||{};
+  const result=ev.result||null;
+  const iter=ev.iteration||0;
+
+  addLog(phase.toLowerCase(), tool, ev);
+
+  if(phase==='ACT'){
+    setStatus('RUNNING');
+    $('iter-d').textContent=`iter ${iter}/`+caseIterations;
+
+    if(tool && result===null && !pendingTools[tool]){
+      // ACT-start row: tool just launched, no result yet
+      addCog('act','ACT', tool, iter);
+      addToolItem(tool, payload, iter);
+    } else if(tool && result!==null){
+      // ACT-result row: tool finished — finalize
+      addCog('act','ACT', tool, iter);
+      if(!pendingTools[tool]) addToolItem(tool, payload, iter);
+      finalizeToolItem(tool, result);
+      // Show in LLM panel
+      const txt=JSON.stringify(result, null, 2);
+      addLLMEntry('observe', `▶ ${tool}`, txt.length>800 ? txt.slice(0,800)+'…' : txt);
+    }
+  }
+  else if(phase==='THINK'){
+    addCog('think','THINK','Planning next action…', iter);
+    $('iter-d').textContent=`iter ${iter}/`+caseIterations;
+    addLLMEntry('think', `THINK #${iter}`, 'Analysing evidence and selecting next tool…');
+  }
+  else if(phase==='REFLECT'){
+    const txt=(result?.final)||(payload?.result?.final)||ev.content||'';
+    addCog('reflect','REFLECT', txt.slice(0,80)||'Evaluating evidence…', iter);
+    if(txt){ finalSummary=txt; addLLMEntry('reflect', `REFLECT #${iter} — FINAL ANALYSIS`, txt); }
+  }
+}
+
+// ─── Cognitive loop ───────────────────────────────────────
+function addCog(cls, phase, text, iter){
+  const body=$('cog-body');
+  body.querySelectorAll('.cog-item').forEach(el=>el.classList.remove('active'));
+  const d=document.createElement('div');
+  d.className=`cog-item ${cls} active`;
+  d.innerHTML=`<span class="cog-ph ${cls}">${phase}</span><span class="cog-txt">${esc(text)}</span><span class="cog-it">#${iter}</span>`;
+  body.appendChild(d);
+  body.scrollTop=body.scrollHeight;
+  while(body.children.length>50) body.removeChild(body.firstChild);
+}
+
+// ─── Tool panel ───────────────────────────────────────────
+function addToolItem(name, args, iter){
+  toolCnt++; $('tcnt').textContent=toolCnt+' call'+(toolCnt>1?'s':'');
+  const body=$('tool-body');
+  const key=name+'_'+Date.now();
+  pendingTools[name]=key;
+  const argStr=Object.entries(args||{}).map(([k,v])=>`${k}:${String(v).slice(0,20)}`).join(' ');
+  const d=document.createElement('div');
+  d.className='tool-item running'; d.id='ti_'+key;
+  d.innerHTML=`<div class="t-name"><span class="st-ic">⟳</span>▶ ${esc(name)}</div><div class="t-args">${esc(argStr)}</div><div class="t-res info" id="tr_${key}">running…</div>`;
+  body.insertBefore(d,body.firstChild);
+  while(body.children.length>25) body.removeChild(body.lastChild);
+}
+function finalizeToolItem(name, result){
+  const key=pendingTools[name]; if(!key) return;
+  const d=$('ti_'+key), res=$('tr_'+key); if(!d||!res) return;
+  const sum=summarize(result);
+  const bad=result&&(result.error||result.sanctioned||result.max_severity>0.5);
+  const ok=result&&!result.error&&!result.unavailable;
+  d.classList.remove('running'); d.classList.add(bad?'warn':ok?'done':'');
+  d.querySelector('.st-ic').textContent=bad?'⚠':'✓';
+  res.className='t-res '+(bad?'bad':'ok');
+  res.textContent=sum;
+  // side effects
+  if(name==='check_sanctions'&&result?.sanctioned) showSanctionHit(result);
+  if(name==='detect_anomaly') applyAnomalyFlags(result?.flags||[]);
+  if(name==='run_gnn_inference') applyGNN(result);
+  if(name==='get_eth_transactions'||name==='get_btc_transactions'||name==='get_tron_transactions'||name==='get_sol_transactions'){
+    memData.txs+=(result?.count||0); updateMem();
+  }
+  if(name==='trace_forward'||name==='trace_backward'){
+    memData.addrs+=(result?.count||0); updateMem();
+  }
+  if(name==='check_bridge_lz'||name==='check_bridge_wh'){
+    memData.bridges+=(result?.count||0); updateMem();
+  }
+  if(name==='web_search'||name==='social_media_intel'){
+    memData.osint+=(result?.count||0); updateMem();
+  }
+  if(name==='darkweb_monitor'){
+    memData.threats+=(result?.count||0); updateMem();
+  }
+}
+
+// ─── Risk ─────────────────────────────────────────────────
+function applyRiskFromCase(c){
+  const score=c.risk_score||0;
+  const grade=(c.risk_grade||'low').toLowerCase();
+  animNum($('rnum'), score);
+  $('rnum').style.color=grade==='critical'||grade==='high'?'var(--red)':grade==='medium'?'var(--amber)':'var(--green)';
+  $('rgrade').textContent=grade.toUpperCase(); $('rgrade').className='risk-grade '+grade;
+  // bars
+  if(c.gnn_score!=null) setBar('rb-gnn','rb-gnn-v', c.gnn_score*100);
+  setBar('rb-sanc','rb-sanc-v', c.sanctions_hit?100:0);
+  // anomaly bar — prefer persisted anomaly_score (0-1), fall back to code-count heuristic
+  if(c.anomaly_score!=null){
+    setBar('rb-anom','rb-anom-v', c.anomaly_score*100);
+  } else if(c.anomaly_codes&&c.anomaly_codes.length){
+    setBar('rb-anom','rb-anom-v', Math.min(c.anomaly_codes.length*8, 90));
+  }
+  // shap from risk_components if present
+  if(c.risk_components) showShap(c.risk_components);
+}
+function applyGNN(r){
+  if(!r||r.unavailable||r.error) return;
+  setBar('rb-gnn','rb-gnn-v',(r.score||0)*100);
+  if(r.top_features) showShap(Object.fromEntries(r.top_features.map(f=>[f.feature||f.name,f.value||f.contribution||0])));
+}
+function applyAnomalyFlags(flags){
+  flags.forEach(f=>{ activateAnom(f.code,f.severity||0.7); });
+  if(flags.length){ const pct=Math.min(flags.length*8,90); setBar('rb-anom','rb-anom-v',pct); }
+}
+function setBar(fillId, lblId, pct){
+  if(pct==null){ $(lblId).textContent='—'; return; }
+  const v=Math.min(Math.round(pct),100);
+  $(fillId).style.width=v+'%'; $(lblId).textContent=v+'%';
+}
+function showShap(obj){
+  const wrap=$('shap-wrap'), rows=$('shap-rows'); wrap.style.display='block'; rows.innerHTML='';
+  const entries=Object.entries(obj).filter(([,v])=>typeof v==='number').sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,5);
+  const max=Math.max(...entries.map(([,v])=>Math.abs(v)),0.001);
+  entries.forEach(([k,v])=>{
+    const pct=Math.abs(v)/max*100;
+    const r=document.createElement('div'); r.className='shap-r';
+    r.innerHTML=`<span class="shap-k">${esc(k.replace(/_/g,' '))}</span><div class="shap-b"><div class="shap-f" style="width:${pct}%"></div></div><span class="shap-v">${v.toFixed?v.toFixed(1):v}</span>`;
+    rows.appendChild(r);
+  });
+}
+function animNum(el, target){
+  let s=parseInt(el.textContent)||0; const dur=1000; const t0=performance.now();
+  const f=t=>{ const p=Math.min((t-t0)/dur,1); el.textContent=Math.round(s+(target-s)*p); if(p<1) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+}
+
+// ─── Anomaly ──────────────────────────────────────────────
+function buildAnomGrid(){
+  const g=$('anom-grid'); g.innerHTML='';
+  ANOM.forEach(([code,name])=>{
+    const d=document.createElement('div'); d.className='af'; d.id='af_'+code;
+    d.innerHTML=`<span class="af-code">${code}</span><span class="af-name">${name}</span><div class="af-sev"><div class="af-sfill" id="asf_${code}" style="width:0%"></div></div>`;
+    g.appendChild(d);
+  });
+}
+function activateAnom(code, sev){
+  const el=$('af_'+code); if(!el) return;
+  el.classList.add('on');
+  const f=$('asf_'+code); if(f) f.style.width=Math.round((sev||0.7)*100)+'%';
+}
+
+// ─── Sanctions ────────────────────────────────────────────
+function showSanctionHit(r){
+  $('sanc-area').innerHTML=`<div class="sanc-hit"><div class="sanc-title">🔴 OFAC SDN SANCTIONS HIT</div><div class="sanc-desc">${esc(JSON.stringify(r.identifications||[]).slice(0,200))}</div></div>`;
+  setBar('rb-sanc','rb-sanc-v',100);
+}
+
+// ─── Log ──────────────────────────────────────────────────
+function addLog(phase, tool, ev){
+  const log=$('hlog');
+  const d=document.createElement('div'); d.className='log-row';
+  const msg=tool?`${tool} ${summarize(ev.payload||ev.result||{}).slice(0,60)}`:((ev.payload?.phase||ev.type||'').slice(0,60));
+  d.innerHTML=`<span class="log-ts">${now8()}</span><span class="log-ph ${phase}">${phase.toUpperCase().slice(0,7)}</span><span class="log-msg">${esc(msg)}</span>`;
+  log.insertBefore(d,log.firstChild);
+  while(log.children.length>120) log.removeChild(log.lastChild);
+}
+
+// ─── LLM output panel ─────────────────────────────────────
+function mdRender(text){
+  if(typeof marked !== 'undefined'){
+    try{ return '<div class="md-render">'+marked.parse(String(text||''))+'</div>'; }catch(e){}
+  }
+  return esc(String(text||''));
+}
+
+function addLLMEntry(cls, header, text){
+  const body=$('llm-body');
+  const d=document.createElement('div');
+  d.className=`llm-entry ${cls}`;
+  // Render markdown only for reflect (FINAL VERDICT / FINAL ANALYSIS)
+  const content = cls==='reflect' ? mdRender(text) : esc(String(text||''));
+  d.innerHTML=`<div class="llm-ph">${esc(header)}</div>${content}`;
+  body.appendChild(d);
+  body.scrollTop=body.scrollHeight;
+  while(body.children.length>200) body.removeChild(body.firstChild);
+}
+
+// ─── Label Intelligence Feed ──────────────────────────────────────────────────
+async function fetchAndRenderLabelFeed(address){
+  if(!TOKEN) return;
+  try{
+    // Always fetch ALL labels (not filtered by address)
+    const r = await fetch(`${API}/labels?limit=100`, {headers:{'Authorization':'Bearer '+TOKEN}});
+    if(!r.ok) return;
+    const labels = await r.json();
+    renderLabelFeed(labels);
+  }catch(e){}
+}
+
+function renderLabelFeed(labels){
+  const body = $('lf-body');
+  const empty = $('lf-empty');
+  const count = $('lf-count');
+  body.innerHTML = '';
+  if(!labels||!labels.length){
+    body.appendChild(Object.assign(document.createElement('div'),{
+      className:'lf-empty', textContent:'NO LABELS YET'
+    }));
+    if(count) count.textContent = '';
+    return;
+  }
+  if(count) count.textContent = labels.length + ' record' + (labels.length>1?'s':'');
+  labels.forEach(lb => {
+    const verdict = lb.audit_verdict || 'PENDING';
+    const tags = (lb.tags||[]).join(', ') || '—';
+    const addr = lb.address || '—';
+    const conf = lb.audit_confidence != null ? (lb.audit_confidence*100).toFixed(0)+'%' : '';
+    const isAuto = (lb.tags||[]).includes('_auto') || (lb.audit_flags||[]).includes('auto_generated');
+
+    const row = document.createElement('div');
+    row.className = 'lf-item';
+    row.title = [
+      'Address: '+addr,
+      'Chain: '+(lb.chain||'—'),
+      'Tags: '+tags,
+      'Verdict: '+verdict+(conf?' ('+conf+')':''),
+      lb.audit_summary ? 'Audit: '+lb.audit_summary.slice(0,200) : '',
+    ].filter(Boolean).join('\n');
+
+    row.innerHTML =
+      `<span class="lf-verdict lf-v-${verdict}">${esc(verdict)}</span>`+
+      `<div class="lf-info">`+
+        `<div class="lf-addr">${esc(addr.length>22?addr.slice(0,10)+'…'+addr.slice(-6):addr)}</div>`+
+        `<div class="lf-tags">${esc(tags.slice(0,48))}${conf?' · '+conf:''}</div>`+
+      `</div>`+
+      (isAuto?`<span class="lf-auto-badge">AUTO</span>`:'');
+
+    body.appendChild(row);
+  });
+}
+
+// ─── Auto-label on HIGH/CRITICAL investigation ────────────────────────────────
+async function autoLabelIfHighRisk(caseObj){
+  const grade = (caseObj.risk_grade||'').toLowerCase();
+  if(grade !== 'high' && grade !== 'critical') return;
+  if(!caseObj.input_address) return;
+
+  const chain   = caseObj.input_chain || (caseObj.input_chain === 'OSINT' ? 'OSINT' : 'ETH');
+  const caseNum = caseObj.case_number || caseId || '—';
+  const anomCodes = (caseObj.anomaly_codes||[]).join(', ') || 'none';
+  const gnnScore  = caseObj.gnn_score   != null ? caseObj.gnn_score.toFixed(4)           : '—';
+  const riskScore = caseObj.risk_score  != null ? caseObj.risk_score.toFixed(1)           : '—';
+  const sanctions = caseObj.sanctions_hit ? 'YES — OFAC SDN HIT' : 'No';
+  const anomScore = caseObj.anomaly_score != null ? (caseObj.anomaly_score*100).toFixed(1)+'%' : '—';
+  const summary   = (caseObj.summary||'').slice(0,800);
+
+  const ANOM_TAG = {P01:'mixer',P02:'layering',P03:'fan-out',P04:'fan-in',
+                    P05:'peeling',P06:'round-trip',P07:'bridge-abuse',
+                    P08:'whale',P09:'darkweb',P14:'flash-loan',P16:'rug-pull'};
+
+  // ── check existing then submit — non-blocking per address ──
+  async function submitOne(addr, nodeTags, chronology){
+    try{
+      const chk = await fetch(`${API}/labels?address=${encodeURIComponent(addr)}&limit=1`,
+        {headers:{'Authorization':'Bearer '+TOKEN}});
+      if(chk.ok){ const ex=await chk.json(); if(ex&&ex.length>0) return; }
+    }catch(e){ return; }
+    try{
+      await fetch(`${API}/labels`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+        body:JSON.stringify({address:addr,chain,tags:[...new Set(nodeTags)],
+          chronology,poc_filename:`${caseNum}.txt`,poc_content:chronology,
+          poc_mimetype:'text/plain',case_id:caseId||null}),
+      });
+    }catch(e){}
+  }
+
+  // ── 1. Subject ────────────────────────────────────────────
+  const subjectTags = [grade,'_auto'];
+  if(caseObj.sanctions_hit) subjectTags.push('sanctioned','ofac');
+  (caseObj.anomaly_codes||[]).forEach(c=>{ if(ANOM_TAG[c]) subjectTags.push(ANOM_TAG[c]); });
+  const subjectChron = [
+    `AUTO-GENERATED from TAHRIX investigation ${caseNum}`,
+    `Role: SUBJECT (focal address under investigation)`,
+    `Risk grade: ${grade.toUpperCase()} (score: ${riskScore}/100)`,
+    `GNN illicit probability: ${gnnScore}`,
+    `Anomaly score: ${anomScore} | Codes: ${anomCodes}`,
+    `OFAC sanctions: ${sanctions}`,
+    `Chain: ${chain}`,
+    summary?`\nAgent verdict:\n${summary}`:'',
+  ].filter(Boolean).join('\n');
+
+  // ── 2. Connected risky wallets (top 5) ────────────────────
+  const connectedRisky = _lastGraphNodes
+    .filter(n=>!n.is_focal && n.node_type==='Wallet' && n.address &&
+      ((n.risk_score!=null&&n.risk_score>=0.5)||n.is_sanctioned||
+       (n.gnn_label&&n.gnn_label.toLowerCase().includes('illicit'))))
+    .sort((a,b)=>(b.risk_score||0)-(a.risk_score||0))
+    .slice(0,5);
+
+  // ── 3. Fire all in parallel (stagger 1s each to spread LLM load) ──
+  const jobs = [];
+
+  // Subject first (stagger 0)
+  jobs.push(submitOne(caseObj.input_address, subjectTags, subjectChron));
+
+  // Connected nodes — stagger 2s apart so LLM not slammed simultaneously
+  connectedRisky.forEach((n, idx) => {
+    const nRisk = n.risk_score!=null?(n.risk_score*100).toFixed(1)+'%':'—';
+    const nGnn  = n.gnn_label||'—';
+    const nSanc = n.is_sanctioned?'YES':'No';
+    const connTags = ['connected-wallet','_auto'];
+    if(n.risk_score>=0.8)      connTags.push('high-risk');
+    else if(n.risk_score>=0.5) connTags.push('medium-risk');
+    if(n.is_sanctioned)        connTags.push('sanctioned','ofac');
+    if(nGnn.toLowerCase().includes('illicit')) connTags.push('gnn-illicit');
+    const connChron = [
+      `AUTO-GENERATED from TAHRIX investigation ${caseNum}`,
+      `Role: CONNECTED WALLET (direct neighbor of subject ${caseObj.input_address})`,
+      `Risk score: ${nRisk} | GNN label: ${nGnn} | OFAC: ${nSanc}`,
+      `TX count: ${n.tx_count!=null?String(n.tx_count):'—'} | Chain: ${chain}`,
+      `Subject risk grade: ${grade.toUpperCase()} (score: ${riskScore}/100)`,
+      `Subject anomaly codes: ${anomCodes}`,
+    ].join('\n');
+
+    // Stagger: subject=0ms, node0=3s, node1=6s, node2=9s…
+    jobs.push(new Promise(resolve =>
+      setTimeout(() => submitOne(n.address, connTags, connChron).then(resolve), (idx+1)*3000)
+    ));
+  });
+
+  // Wait all, then refresh feed
+  Promise.allSettled(jobs).then(() =>
+    fetchAndRenderLabelFeed(caseObj.input_address)
+  );
+}
+
+// ─── Memory ───────────────────────────────────────────────
+function updateMem(){
+  const el=$('mem-list');
+  el.innerHTML=`
+    <div class="mem-row"><span>Transactions</span><span>${memData.txs}</span></div>
+    <div class="mem-row"><span>Addresses seen</span><span>${memData.addrs}</span></div>
+    <div class="mem-row"><span>Tool calls</span><span>${toolCnt}</span></div>
+    <div class="mem-row"><span>Bridge events</span><span>${memData.bridges}</span></div>
+    <div class="mem-row"><span>OSINT results</span><span>${memData.osint}</span></div>
+    <div class="mem-row"><span>Threat hits</span><span>${memData.threats}</span></div>
+  `;
+}
+
+function updateMemFromCase(c){
+  // Rebuild memory totals from case-level data on every poll — source of truth
+  const codes = c.anomaly_codes||[];
+  const hasThreats = codes.some(cd=>['P01','P06','P11'].includes(cd));
+  // iterations as proxy for tool calls if toolCnt is 0
+  if(toolCnt===0 && c.iterations) toolCnt=c.iterations*2;
+  updateMem();
+}
+
+// ─── Hypothesis ───────────────────────────────────────────
+function updateHypothesis(c){
+  const el=$('hyp-list');
+  if(!c) return;
+  const conf=c.confidence||0;
+  const grade=(c.risk_grade||'low').toLowerCase();
+  const codes=c.anomaly_codes||[];
+  const pct=Math.round(conf*100);
+  const clr=grade==='critical'||grade==='high'?'var(--red)':grade==='medium'?'var(--amber)':'var(--cyan)';
+
+  // Hypothesis title inferred from findings
+  const status=c.status||'pending';
+  let verdict='Wallet under investigation';
+  if(status==='completed'){
+    if(grade==='critical') verdict='CRITICAL: Illicit activity confirmed';
+    else if(grade==='high') verdict='HIGH risk — suspicious activity detected';
+    else if(grade==='medium') verdict='MEDIUM risk — anomalies present';
+    else if(codes.length) verdict='Low risk — minor anomalies flagged';
+    else verdict='Low risk — no significant patterns detected';
+  } else if(status==='in_progress'){
+    verdict='Investigating wallet activity…';
+  }
+
+  const barFill=`<div style="height:3px;background:var(--border);border-radius:2px;margin:5px 0 3px">
+    <div style="height:3px;background:${clr};border-radius:2px;width:${pct}%;transition:width .5s"></div></div>`;
+
+  el.innerHTML=`<div class="hyp-item">
+    <div style="color:${clr};font-size:9px;margin-bottom:4px">${esc(verdict)}</div>
+    ${barFill}
+    <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--text3)">
+      <span>Confidence</span><span style="color:${clr}">${pct}%</span>
+    </div>
+    ${codes.length?`<div style="margin-top:5px;font-size:8px;color:var(--text3)">Patterns: <span style="color:var(--amber)">${esc(codes.join(', '))}</span></div>`:''}
+    ${c.sanctions_hit?`<div style="margin-top:4px;font-size:8px;color:var(--red);font-weight:700">⚠ OFAC SANCTIONS HIT</div>`:''}
+  </div>`;
+}
+
+// ─── Graph ────────────────────────────────────────────────
+async function fetchAndRenderGraph(){
+  try{
+    const r=await fetch(`${API}/cases/${caseId}/graph`,{headers:{'Authorization':`Bearer ${TOKEN}`}});
+    if(!r.ok) return;
+    const d=await r.json();
+    const nodes=d.nodes||[], edges=d.edges||[];
+    _lastGraphNodes = nodes;  // cache for auto-label
+    $('ginfo').textContent=`${nodes.length} nodes · ${edges.length} edges`;
+    if(nodes.length) { $('graph-empty').style.display='none'; renderGraph(nodes,edges); }
+  }catch(e){ console.warn('graph',e); }
+}
+
+function renderGraph(rawNodes, rawEdges){
+  const svgEl=$('gsvg');
+  const W=svgEl.clientWidth, H=svgEl.clientHeight;
+  const svg=d3.select('#gsvg'), g=d3.select('#gg');
+  g.selectAll('*').remove();
+
+  // Deep-copy so D3 mutations never corrupt the caller's arrays
+  const nodes = rawNodes.map(n=>({...n}));
+  const edges = rawEdges.map(e=>({...e}));
+
+  // Normalize node fields
+  nodes.forEach(n=>{
+    n.type = n.node_type || n.type || 'Wallet';
+    n.id   = String(n.id || n.address || Math.random().toString(36).slice(2));
+  });
+
+  // Extract source/target as plain strings BEFORE D3 touches anything
+  edges.forEach(e=>{
+    const src = e.from || e.source;
+    const tgt = e.to   || e.target;
+    e.source = typeof src === 'object' && src !== null ? String(src.id||'') : String(src||'');
+    e.target = typeof tgt === 'object' && tgt !== null ? String(tgt.id||'') : String(tgt||'');
+  });
+
+  const vis = nodes.filter(n=>activeFilters.has(n.type));
+  const visIds = new Set(vis.map(n=>n.id));
+  const visEdges = edges.filter(e=>e.source && e.target && visIds.has(e.source) && visIds.has(e.target));
+
+  // Drop nodes that have no edge on either side (isolated / orphan nodes)
+  const connectedIds = new Set();
+  visEdges.forEach(e=>{ connectedIds.add(e.source); connectedIds.add(e.target); });
+  // Always keep the focal node even if isolated (it's the subject of investigation)
+  const visFiltered = vis.filter(n=>connectedIds.has(n.id) || n.is_focal);
+  const filteredIds = new Set(visFiltered.map(n=>n.id));
+  // Re-filter edges in case focal-only kept but refs now consistent
+  const filteredEdges = visEdges.filter(e=>filteredIds.has(e.source) && filteredIds.has(e.target));
+
+  // Node dimensions per type
+  const NODE_W = {Wallet:120, Transaction:100, Entity:110, OsintNode:110, ThreatIntel:110, AnomalyPattern:100, ChainNetwork:90};
+  const NODE_H = {Wallet:40, Transaction:32, Entity:36, OsintNode:36, ThreatIntel:36, AnomalyPattern:32, ChainNetwork:30};
+  const nW = n => NODE_W[n.type] || 100;
+  const nH = n => NODE_H[n.type] || 34;
+
+  // Node label line 1 (type badge text)
+  const TYPE_LBL = {Wallet:'WALLET', Transaction:'TX', Entity:'ENTITY', OsintNode:'OSINT', ThreatIntel:'THREAT', AnomalyPattern:'ANOMALY', ChainNetwork:'CHAIN'};
+  // Node content line 2
+  function nodeLabel(n){
+    if(n.type==='Wallet') return (n.address||n.id||'').slice(0,14)+'…';
+    if(n.type==='Transaction') return (n.hash||n.id||'').slice(0,13)+'…';
+    if(n.type==='Entity') return (n.name||n.id||'').slice(0,16);
+    if(n.type==='OsintNode') return (n.platform||'web')+' · '+(n.source||'').slice(0,10);
+    if(n.type==='ThreatIntel') return (n.threat_type||n.source||'').slice(0,16);
+    if(n.type==='AnomalyPattern') return n.code||'PATTERN';
+    if(n.type==='ChainNetwork') return (n.name||n.id||'').slice(0,12);
+    return (n.id||'').slice(0,14);
+  }
+
+  // Draw edges BEHIND nodes
+  const link=g.append('g').attr('class','edges')
+    .selectAll('line').data(filteredEdges).enter().append('line')
+    .attr('stroke','#243552').attr('stroke-width',1)
+    .attr('marker-end','url(#arr)');
+
+  // Edge type labels
+  const edgeLbl=g.append('g').attr('class','edge-lbls')
+    .selectAll('text').data(filteredEdges).enter().append('text')
+    .attr('fill','#334155').attr('font-size',7).attr('font-family','monospace')
+    .attr('text-anchor','middle').attr('dy','-3')
+    .text(e=>e.edge_type||e.type||'');
+
+  // Node groups
+  const node=g.append('g').attr('class','nodes')
+    .selectAll('g').data(visFiltered).enter().append('g')
+    .attr('cursor','grab')
+    .call(d3.drag()
+      .on('start',(e,d)=>{ d.fx=d.x; d.fy=d.y; sim.alphaTarget(0.15).restart(); })
+      .on('drag',(e,d)=>{ d.fx=e.x; d.fy=e.y; })
+      .on('end',(e,d)=>{ sim.alphaTarget(0); d.fx=d.x; d.fy=d.y; }) // pin at drop position
+    );
+
+  // Background rect
+  node.append('rect')
+    .attr('width', n=>nW(n))
+    .attr('height', n=>nH(n))
+    .attr('x', n=>-nW(n)/2)
+    .attr('y', n=>-nH(n)/2)
+    .attr('rx', 3).attr('ry', 3)
+    .attr('fill', n=>n.is_focal ? '#0d1f3c' : '#0c1118')
+    .attr('stroke', n=>{
+      if(n.is_sanctioned) return '#ef4444';
+      if(n.is_focal) return '#3b82f6';
+      if(n.type === 'OsintNode' && n.source) return NODE_CLR[n.source] || NODE_CLR['OsintNode'];
+      return NODE_CLR[n.type] || '#243552';
+    })
+    .attr('stroke-width', n=>(n.is_sanctioned||n.is_focal) ? 1.5 : 1);
+
+  // Type badge (top stripe)
+  node.append('rect')
+    .attr('width', n=>nW(n))
+    .attr('height', 10)
+    .attr('x', n=>-nW(n)/2)
+    .attr('y', n=>-nH(n)/2)
+    .attr('rx', 3).attr('ry', 3)
+    .attr('fill', n=>n.type === 'OsintNode' && n.source ? (NODE_CLR[n.source] || NODE_CLR['OsintNode']) : (NODE_CLR[n.type] || '#243552'))
+    .attr('opacity', 0.18);
+
+  // Type label
+  node.append('text')
+    .attr('text-anchor','middle')
+    .attr('y', n=>-nH(n)/2 + 7)
+    .attr('fill', n=>NODE_CLR[n.type]||'#64748b')
+    .attr('font-size', 7)
+    .attr('font-family','monospace')
+    .attr('letter-spacing','1.5')
+    .text(n=>TYPE_LBL[n.type]||n.type.toUpperCase());
+
+  // Content label
+  node.append('text')
+    .attr('text-anchor','middle')
+    .attr('y', n=>nH(n)/2 - 8)
+    .attr('fill','#cbd5e1')
+    .attr('font-size', 8)
+    .attr('font-family','monospace')
+    .text(n=>nodeLabel(n));
+
+  // Sanctioned warning
+  node.filter(n=>n.is_sanctioned).append('text')
+    .attr('text-anchor','middle')
+    .attr('y', 2)
+    .attr('fill','#ef4444')
+    .attr('font-size',7)
+    .attr('font-family','monospace')
+    .text('⚠ SANCTIONED');
+
+  // Hover tooltip — full detail
+  node.on('mouseover',(evt,d)=>{
+    const t=$('gtt');
+    const color = d.type === 'OsintNode' && d.source ? (NODE_CLR[d.source] || NODE_CLR['OsintNode']) : (NODE_CLR[d.type] || '#94a3b8');
+    let rows='';
+    const row=(k,v)=>v!=null&&v!==''?`<div class="gtt-row"><span class="gtt-k">${esc(k)}</span><span class="gtt-v">${esc(String(v))}</span></div>`:'';
+    // Common
+    rows+=row('ID / Hash', d.address||d.hash||d.id);
+    rows+=row('Chain', d.chain);
+    // Per-type detail
+    if(d.type==='Wallet'){
+      rows+=row('Risk score', d.risk_score!=null ? (d.risk_score*100).toFixed(1)+'%' : null);
+      rows+=row('Entity', d.entity_label);
+      rows+=row('GNN label', d.gnn_label);
+      rows+=row('TX count', d.tx_count);
+      rows+=row('Balance USD', d.balance_usd!=null ? '$'+Number(d.balance_usd).toFixed(2) : null);
+      rows+=row('Is contract', d.is_contract?'Yes':null);
+    } else if(d.type==='Transaction'){
+      rows+=row('Value USD', d.value_usd!=null?'$'+Number(d.value_usd).toFixed(4):null);
+      rows+=row('Value native', d.value_native);
+      rows+=row('Asset', d.asset);
+      rows+=row('Timestamp', d.timestamp ? d.timestamp.slice(0,19) : null);
+      rows+=row('Method', d.method);
+      rows+=row('Status', d.status);
+    } else if(d.type==='Entity'){
+      rows+=row('Name', d.name);
+      rows+=row('Entity type', d.entity_type);
+      rows+=row('Risk level', d.risk_level);
+      rows+=row('Source', d.source);
+    } else if(d.type==='OsintNode'){
+      rows+=row('Source', d.source);
+      rows+=row('Platform', d.platform);
+      rows+=row('URL', d.url ? d.url.slice(0,60) : null);
+      rows+=row('Snippet', d.snippet ? d.snippet.slice(0,120) : null);
+      rows+=row('Retrieved', d.retrieved_at ? d.retrieved_at.slice(0,19) : null);
+    } else if(d.type==='ThreatIntel'){
+      rows+=row('Threat type', d.threat_type);
+      rows+=row('Severity', d.severity!=null ? (d.severity*100).toFixed(0)+'%' : null);
+      rows+=row('Source', d.source);
+      rows+=row('Confirmed', d.confirmed!=null ? (d.confirmed?'Yes':'No') : null);
+      rows+=row('Description', d.description ? d.description.slice(0,120) : null);
+      rows+=row('URL', d.url ? d.url.slice(0,60) : null);
+    } else if(d.type==='AnomalyPattern'){
+      rows+=row('Code', d.code);
+      rows+=row('Severity', d.severity!=null ? (d.severity*100).toFixed(0)+'%' : null);
+      rows+=row('Description', d.description ? d.description.slice(0,120) : null);
+      rows+=row('Case ID', d.case_id);
+    } else if(d.type==='ChainNetwork'){
+      rows+=row('Chain', d.name);
+    }
+    const badges=(d.is_sanctioned?`<span class="gtt-badge gtt-sanc">SANCTIONED</span>`:'')
+                +(d.is_focal?`<span class="gtt-badge gtt-focal">FOCAL</span>`:'');
+    t.innerHTML=`<div class="gtt-type" style="color:${color}">${esc(d.type)}</div>${rows}${badges?'<div style="margin-top:4px">'+badges+'</div>':''}`;
+    t.style.display='block';
+    // Position — keep inside graph panel
+    const panel=$('gsvg').getBoundingClientRect();
+    const tx=Math.min(evt.clientX - panel.left + 14, panel.width - 300);
+    const ty=Math.min(evt.clientY - panel.top  + 14, panel.height - t.offsetHeight - 8);
+    t.style.left=tx+'px'; t.style.top=ty+'px';
+  })
+  .on('mousemove',(evt,d)=>{
+    const panel=$('gsvg').getBoundingClientRect();
+    const t=$('gtt');
+    const tx=Math.min(evt.clientX - panel.left + 14, panel.width - 300);
+    const ty=Math.min(evt.clientY - panel.top  + 14, panel.height - t.offsetHeight - 8);
+    t.style.left=tx+'px'; t.style.top=ty+'px';
+  })
+  .on('mouseout',()=>{ $('gtt').style.display='none'; });
+
+  // ── Node click → Detail Drawer ─────────────────────────────────────────────
+  node.on('click',(evt,d)=>{
+    evt.stopPropagation();
+    $('gtt').style.display='none';
+    openNodeDrawer(d);
+  });
+
+  // Close drawer when clicking blank SVG
+  d3.select('#gsvg').on('click',()=>closeNodeDrawer());
+
+  if(sim) sim.stop();
+  sim=d3.forceSimulation(visFiltered)
+    .alphaDecay(0.06)
+    .velocityDecay(0.55)
+    .force('link', d3.forceLink(filteredEdges).id(d=>d.id).distance(d=>{
+      const sw=NODE_W[typeof d.source==='object'?d.source.type:'Wallet']||100;
+      const tw=NODE_W[typeof d.target==='object'?d.target.type:'Wallet']||100;
+      return (sw+tw)/2 + 40;
+    }).strength(0.4))
+    .force('charge', d3.forceManyBody().strength(-300))
+    .force('center', d3.forceCenter(W/2, H/2))
+    .force('collide', d3.forceCollide(d=>Math.max(nW(d),nH(d))/2 + 12))
+    .on('tick',()=>{
+      link
+        .attr('x1',d=>d.source.x)
+        .attr('y1',d=>d.source.y)
+        .attr('x2',d=>d.target.x)
+        .attr('y2',d=>d.target.y);
+      edgeLbl
+        .attr('x',d=>(d.source.x+d.target.x)/2)
+        .attr('y',d=>(d.source.y+d.target.y)/2);
+      node.attr('transform',d=>`translate(${d.x||0},${d.y||0})`);
+    });
+
+  svg.call(d3.zoom().scaleExtent([.1,6]).on('zoom',e=>g.attr('transform',e.transform)));
+
+  // Update node/edge counter to reflect connected-only display
+  $('ginfo').textContent=`${visFiltered.length} nodes · ${filteredEdges.length} edges`
+    + (visFiltered.length < nodes.length ? ` (${nodes.length - visFiltered.length} isolated hidden)` : '');
+}
+
+function toggleF(btn, type){
+  if(activeFilters.has(type)){ activeFilters.delete(type); btn.classList.remove('on'); }
+  else { activeFilters.add(type); btn.classList.add('on'); }
+  fetchAndRenderGraph();
+}
+
+// ─── Summary overlay ──────────────────────────────────────
+function showSummary(c){
+  const grade=(c.risk_grade||'low').toLowerCase();
+  $('sum-verdict').textContent=grade.toUpperCase()+' RISK — '+(c.risk_score||0).toFixed(1)+'/100';
+  $('sum-verdict').className='sum-verdict '+grade;
+  $('sum-meta').innerHTML=`
+    <div class="sum-kv"><div class="sum-k">Address</div><div class="sum-v">${shortA(caseAddr)}</div></div>
+    <div class="sum-kv"><div class="sum-k">Chain</div><div class="sum-v">${caseChain}</div></div>
+    <div class="sum-kv"><div class="sum-k">GNN Score</div><div class="sum-v">${c.gnn_score!=null?c.gnn_score.toFixed(4):'—'}</div></div>
+    <div class="sum-kv"><div class="sum-k">Anomalies</div><div class="sum-v">${(c.anomaly_codes||[]).join(', ')||'—'}</div></div>
+    <div class="sum-kv"><div class="sum-k">Iterations</div><div class="sum-v">${c.iterations||'—'}</div></div>
+    <div class="sum-kv"><div class="sum-k">Sanctions</div><div class="sum-v">${c.sanctions_hit?'🔴 HIT':'✓ Clear'}</div></div>
+  `;
+  $('sum-text').innerHTML=mdRender((c.summary||'').slice(0,2000));
+  $('sum-overlay').style.display='flex';
+}
+
+// ─── IPFS ─────────────────────────────────────────────────
+function showIPFS(cid){
+  $('ipfs-area').innerHTML=`<div class="ipfs-pill"><span class="ipfs-lbl">IPFS</span><span class="ipfs-cid">${esc(cid)}</span></div>`;
+}
+
+// ─── Boot ─────────────────────────────────────────────────
+window.addEventListener('load',()=>{ $('li-email').focus(); });
+
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('#gexport-wrap'))    $('gexport-menu').classList.remove('open');
+  if (!e.target.closest('#report-btn-wrap')) $('report-menu').classList.remove('open');
+});
+
+
+function _dl(url,name){
+  const a=document.createElement('a'); a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+// ─── Shared: build tight export SVG from live graph ────────
+// Returns the serialized SVG string, or null if graph is empty.
+function _buildExportSvg(){
+  const MARGIN = 40;
+  const BG     = '#060a0f';
+  const svgEl  = $('gsvg');
+  const gEl    = $('gg');
+  let bbox;
+  try { bbox = gEl.getBBox(); } catch(e) { bbox = null; }
+  if(!bbox || bbox.width === 0) return null;
+
+  const vx = bbox.x - MARGIN, vy = bbox.y - MARGIN;
+  const vw = bbox.width  + MARGIN * 2;
+  const vh = bbox.height + MARGIN * 2;
+
+  const gClone = gEl.cloneNode(true);
+  gClone.removeAttribute('transform');
+
+  const defsOrig = svgEl.querySelector('defs');
+  const defsClone = defsOrig
+    ? defsOrig.cloneNode(true)
+    : document.createElementNS('http://www.w3.org/2000/svg','defs');
+
+  const newSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  newSvg.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  // Cap rendered size so WeasyPrint is fast — viewBox handles aspect ratio
+  const maxW = 800, scale = Math.min(1, maxW / Math.ceil(vw));
+  newSvg.setAttribute('width',  Math.ceil(vw * scale));
+  newSvg.setAttribute('height', Math.ceil(vh * scale));
+  newSvg.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+
+  const bgRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bgRect.setAttribute('x', vx); bgRect.setAttribute('y', vy);
+  bgRect.setAttribute('width', vw); bgRect.setAttribute('height', vh);
+  bgRect.setAttribute('fill', BG);
+
+  newSvg.appendChild(defsClone);
+  newSvg.appendChild(bgRect);
+  newSvg.appendChild(gClone);
+  return {svg: new XMLSerializer().serializeToString(newSvg),
+          w: Math.ceil(vw * scale), h: Math.ceil(vh * scale)};
+}
+
+// Capture graph as PNG data-URL (Promise). Resolves null if graph empty.
+function _captureGraphPng(){
+  const built = _buildExportSvg();
+  if(!built) return Promise.resolve(null);
+  const {svg, w, h} = built;
+  const RASTER = 2;
+  const url = URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas');
+      canvas.width = w * RASTER; canvas.height = h * RASTER;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(RASTER, RASTER);
+      ctx.fillStyle = '#060a0f'; ctx.fillRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/png', 0.95));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
+// ─── Graph Export ──────────────────────────────────────────
+function toggleGExportMenu(e){
+  e.stopPropagation();
+  $('gexport-menu').classList.toggle('open');
+}
+
+function exportGraph(fmt){
+  $('gexport-menu').classList.remove('open');
+  const built = _buildExportSvg();
+  if(!built){ alert('Graph is empty — nothing to export.'); return; }
+  const {svg, w, h} = built;
+
+  if(fmt === 'svg'){
+    const blob = new Blob([svg], {type:'image/svg+xml'});
+    _dl(URL.createObjectURL(blob), `${caseNum||'graph'}.svg`);
+    return;
+  }
+
+  const RASTER = 2;
+  const url = URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+  const img = new Image();
+  img.onload = ()=>{
+    const canvas = document.createElement('canvas');
+    canvas.width = w * RASTER; canvas.height = h * RASTER;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(RASTER, RASTER);
+    ctx.fillStyle = '#060a0f'; ctx.fillRect(0,0,w,h);
+    ctx.drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(url);
+    const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+    canvas.toBlob(blob=>{
+      _dl(URL.createObjectURL(blob), `${caseNum||'graph'}.${fmt}`);
+    }, mime, 0.95);
+  };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); alert('Graph export failed — try SVG format.'); };
+  img.src = url;
+}
+
+// ─── Report Export ─────────────────────────────────────────
+function toggleReportMenu(e){
+  if($('btn-report').disabled) return;
+  e.stopPropagation();
+  $('report-menu').classList.toggle('open');
+}
+
+async function downloadReport(fmt){
+  $('report-menu').classList.remove('open');
+  if(!caseId) return;
+  const btn=$('btn-report'), txt=$('report-btn-txt');
+  btn.disabled=true; txt.textContent='CREATING REPORT...'; btn.classList.add('creating');
+  try{
+    // Send SVG string (text, ~50KB) — much smaller than PNG data-URL (~1MB)
+    // WeasyPrint renders inline SVG natively with full fidelity
+    const built = _buildExportSvg();
+    const graphSvg = built ? built.svg : null;
+
+    const resp = await fetch(`${API}/cases/${caseId}/report?format=${fmt}`, {
+      method: 'POST',
+      headers: {'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json'},
+      body: JSON.stringify({graph_svg: graphSvg || null}),
+    });
+    if(!resp.ok) throw new Error(`Server error ${resp.status}`);
+    const blob = await resp.blob();
+    _dl(URL.createObjectURL(blob), `${caseNum||caseId}.${fmt}`);
+  }catch(err){ alert('Report generation failed: '+err.message); }
+  finally{
+    btn.disabled=false; txt.textContent='EXPORT REPORT ▾'; btn.classList.remove('creating');
+  }
+}
+</script>
+</body>
+</html>
