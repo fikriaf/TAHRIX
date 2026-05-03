@@ -19,3 +19,15 @@ ml/data/
 *.pt
 *.pth
 .DS_Store
+
+# Test scripts (root directory)
+test_*.sh
+test_*.py
+check_*.sh
+poll_*.sh
+debug_*.sh
+direct_test.sh
+cleanup_*.sh
+fix_*.sh
+wait_*.sh
+probe_*.py
