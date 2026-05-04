@@ -156,9 +156,21 @@ TAHRIX/
 │   └── tests/              # Test suite
 ├── frontend/               # Single-page application
 │   └── index.html          # Dashboard UI
+├── skills/                 # Claude Code installable skills
+│   └── tahrix-agent/       # LLM streaming + tool calling + frontend rendering
 ├── demo/                   # Demo screenshots
 └── agentic_ai_architecture.svg  # System architecture diagram
 ```
+
+## Claude Code Skill
+
+Install the TAHRIX Agent skill for Claude Code to reuse the streaming + tool calling + flow-based frontend rendering pattern:
+
+```bash
+npx skills add https://github.com/fikriaf/TAHRIX --skill tahrix-agent
+```
+
+See [`skills/tahrix-agent/SKILL.md`](skills/tahrix-agent/SKILL.md) for details.
 
 ## Deployment
 
