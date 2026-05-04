@@ -1,7 +1,7 @@
 <table align="center">
 <tr><td align="center">
 
-# TAHRIX
+<img src="frontend/logo/logo_text_TAHRIX.png" alt="TAHRIX" width="400">
 
 ---
 
