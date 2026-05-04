@@ -5,7 +5,7 @@ Claude Code Skill — Build AI agents with LLM streaming, tool calling, and flow
 ## Install
 
 ```bash
-npx skills add https://github.com/fikriaf/tahrix-agent --skill tahrix-agent
+npx skills add https://github.com/fikriaf/TAHRIX --skill tahrix-agent
 ```
 
 ## What This Skill Provides
