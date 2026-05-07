@@ -53,7 +53,7 @@ class LLMProvider:
         if settings.llm_fallback_url:
             from openai import AsyncOpenAI
             self._fallback_client = AsyncOpenAI(
-                api_key=settings.llm_fallback_api_key or "dummy",
+                api_key=(settings.llm_fallback_api_key.get_secret_value() if settings.llm_fallback_api_key else "dummy"),
                 base_url=settings.llm_fallback_url,
                 timeout=120.0,
                 max_retries=2,
@@ -113,6 +113,101 @@ class LLMProvider:
             finish_reason=choice.finish_reason,
             usage=resp.usage.model_dump() if resp.usage else None,
         )
+
+    async def chat_stream(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | dict | None = "auto",
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ):
+        """Async generator yielding SSE-style dicts from the streaming LLM.
+
+        Yields dicts with keys:
+          type: "reasoning" | "content" | "tool_call" | "usage" | "done"
+          + type-specific fields (text, tool_name, tool_args, usage_data, etc.)
+        """
+        try:
+            stream = await self._client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                tools=tools or None,
+                tool_choice=tool_choice if tools else None,
+                temperature=temperature if temperature is not None else settings.llm_temperature,
+                max_tokens=max_tokens or settings.llm_max_tokens,
+                stream=True,
+            )
+        except Exception as e:
+            yield {"type": "error", "text": str(e)}
+            return
+
+        # Accumulate tool calls across chunks
+        tool_calls_acc: dict[int, dict[str, Any]] = {}
+
+        async for chunk in stream:
+            if not chunk.choices:
+                continue
+            choice = chunk.choices[0]
+            delta = choice.delta
+
+            # Reasoning tokens
+            if hasattr(delta, "reasoning") and delta.reasoning:
+                yield {"type": "reasoning", "text": delta.reasoning}
+
+            # Content tokens
+            if delta.content:
+                yield {"type": "content", "text": delta.content}
+
+            # Tool call deltas (accumulate across chunks)
+            if delta.tool_calls:
+                for tc_delta in delta.tool_calls:
+                    idx = tc_delta.index if tc_delta.index is not None else 0
+                    if idx not in tool_calls_acc:
+                        tool_calls_acc[idx] = {
+                            "id": tc_delta.id or "",
+                            "name": "",
+                            "arguments": "",
+                        }
+                    if tc_delta.id:
+                        tool_calls_acc[idx]["id"] = tc_delta.id
+                    if tc_delta.function:
+                        if tc_delta.function.name:
+                            tool_calls_acc[idx]["name"] += tc_delta.function.name
+                        if tc_delta.function.arguments:
+                            tool_calls_acc[idx]["arguments"] += tc_delta.function.arguments
+
+            # Finish reason — emit accumulated tool calls
+            if choice.finish_reason:
+                # Emit any accumulated tool calls
+                for idx in sorted(tool_calls_acc.keys()):
+                    tc = tool_calls_acc[idx]
+                    try:
+                        args = json.loads(tc["arguments"] or "{}")
+                    except json.JSONDecodeError:
+                        args = {}
+                    yield {
+                        "type": "tool_call",
+                        "tool_call_id": tc["id"],
+                        "tool_name": tc["name"],
+                        "tool_args": args,
+                    }
+
+                # Usage from last chunk
+                usage_data = None
+                if chunk.usage:
+                    usage_data = {
+                        "prompt_tokens": chunk.usage.prompt_tokens,
+                        "completion_tokens": chunk.usage.completion_tokens,
+                        "total_tokens": chunk.usage.total_tokens,
+                    }
+
+                yield {
+                    "type": "done",
+                    "finish_reason": choice.finish_reason,
+                    "usage": usage_data,
+                }
 
     async def aclose(self) -> None:
         await self._client.close()

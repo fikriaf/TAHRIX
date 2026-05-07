@@ -100,9 +100,9 @@ class Settings(BaseSettings):
     llm_max_tokens: int = 2000
 
     # ── LLM Fallback (Ollama) ──
-    llm_fallback_url: str = "https://ollama.com/v1"
+    llm_fallback_url: str | None = None
     llm_fallback_model: str = "minimax-m2.5"
-    llm_fallback_api_key: str = "4dae6c934e724fd98c93f5e97a700ade.Rdmh66Y9KFK4zLEthbp5Z4hI"
+    llm_fallback_api_key: SecretStr | None = None
 
     # ── GNN ──
     gnn_model_path: str = "./ml/artifacts/gat_elliptic.onnx"
